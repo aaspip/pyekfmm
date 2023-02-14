@@ -3,7 +3,7 @@
 
 ## Description
 
-**Pyekfmm** is python package for 3D fast-marching-based traveltime calculation and its applications in seismology
+**Pyekfmm** is python package for 3D fast-marching-based traveltime calculation and its applications in seismology. The initial version of this package was held at https://github.com/chenyk1990/pyekfmm, which is no longer maintained.
 
 
 ## Reference
@@ -67,7 +67,7 @@ or using Pypi
 -----------
 ## Gallery
 The gallery figures of the pyekfmm package can be found at
-    https://github.com/chenyk1990/gallery/tree/main/pyekfmm
+    https://github.com/aaspip/gallery/tree/main/pyekfmm
 Each figure in the gallery directory corresponds to a DEMO script in the "demo" directory with the exactly the same file name.
 
 These gallery figures are also presented below. 
