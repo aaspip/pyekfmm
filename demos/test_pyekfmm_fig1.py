@@ -46,5 +46,5 @@ plt.show()
 
 ## Verify
 print(['Testing result:',time.max(),time.min(),time.std(),time.var()])
-print(['Correct result:',2.1514063, 0.0, 0.44167396, 0.19507588])
+print(['Correct result:',2.1797864, 0.0, 0.44571817, 0.19866468])
 

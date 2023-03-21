@@ -104,6 +104,6 @@ plt.savefig('test_pyekfmm_fig3.pdf',format='pdf',dpi=300,bbox_inches='tight', pa
 plt.show()
 
 ## Verify
-# print(['Testing result:',time.max(),time.min(),time.std(),time.var()])
-# print(['Correct result:',2.1514063, 0.0, 0.44167396, 0.19507588])
+print(['Testing result:',time.max(),time.min(),time.std(),time.var()])
+print(['Correct result:',2.84689, 0.0, 0.53170025, 0.28270516])
 

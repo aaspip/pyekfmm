@@ -21,7 +21,7 @@ time2=t.reshape(101,101,101,order='F');#first axis (vertical) is x, second is z
 
 ## Verify
 print(['Testing result:',time.max(),time.min(),time.std(),time.var()])
-print(['Correct result:',0.49965078, 0.0, 0.08905013, 0.007929926])
+print(['Correct result:',0.4845428, 0.0, 0.08635751, 0.00745762])
 
 
 import matplotlib.pyplot as plt

@@ -58,7 +58,7 @@ time2=t.reshape(numr,numt,nump,order='F'); #[r,t,p]
 
 ## Verify
 print(['Testing result:',time.max(),time.min(),time.std(),time.var()])
-print(['Correct result:',2140.937, 0.016649984, 75.647644, 5722.5664])
+print(['Correct result:',6698.3594, 0.7446289, 1347.9429, 1816950.0])
 #print(['Correct result:',285.1792, 0.016649984, 75.70713, 5731.57]) #If using order=2
 
 
@@ -182,7 +182,7 @@ plt.axis('off')
 
 # # plt.yticks([0,-60],['00','60 S']) #not work
 # # plt.yticks([3200],['90']) #not work
-plt.savefig('test_pyekfmm_fig5.pdf',format='pdf',dpi=300,bbox_inches='tight', pad_inches=0)
+# plt.savefig('test_pyekfmm_fig5.pdf',format='pdf',dpi=300,bbox_inches='tight', pad_inches=0)
 plt.savefig('test_pyekfmm_fig5.png',format='png',dpi=300,bbox_inches='tight', pad_inches=0)
 # 
 # # add a title.
