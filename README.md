@@ -7,7 +7,7 @@
 
 
 ## Reference
-    Chen Y., Chen, Y.F., Fomel, S., Savvaidis, A., Saad, O.M., Oboue, Y.A.S.I. (2023). A python package for 3D fast-marching-based traveltime calculation and its applications in seismology, Seismological Research Letters, in press.
+    Chen Y., Chen, Y.F., Fomel, S., Savvaidis, A., Saad, O.M., Oboue, Y.A.S.I. (2023). A python package for 3D fast-marching-based traveltime calculation and its applications in seismology, Seismological Research Letters, 94, 2050-2059.
     
 BibTeX:
 
@@ -15,10 +15,10 @@ BibTeX:
 	  title={Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology},
 	  author={Yangkang Chen and Yunfeng Chen and Sergey Fomel and Alexandros Savvaidis and Omar M. Saad and Yapo Abol\'{e} Serge Innocent Obou\'{e}},
 	  journal={Seismological Research Letters},
-	  volume={TBD},
-	  number={TBD},
-	  issue={TBD},
-	  pages={in press},
+	  volume={94},
+	  number={1},
+	  issue={1},
+	  pages={2050-2059},
 	  year={2023}
  	}
 
