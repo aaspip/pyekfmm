@@ -1076,7 +1076,6 @@ static PyObject *eikonalvtic_oneshot(PyObject *self, PyObject *args){
 	ndim = 3;
      
     s = (float**)malloc(nshot * sizeof(float*));
-    int i;
     for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 
@@ -1224,7 +1223,6 @@ static PyObject *eikonalvtic_oneshot_angle(PyObject *self, PyObject *args){
 	ndim = 3;
      
     s = (float**)malloc(nshot * sizeof(float*));
-    int i;
     for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 
@@ -1459,7 +1457,6 @@ static PyObject *eikonalvtic_multishots(PyObject *self, PyObject *args){
 
 	ndim = 3; 
     s = (float**)malloc(nshot * sizeof(float*));
-    int i;
     for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 	
@@ -1596,7 +1593,6 @@ static PyObject *eikonalvtic_multishots_angle(PyObject *self, PyObject *args){
 
 	ndim = 3; 
     s = (float**)malloc(nshot * sizeof(float*));
-    int i;
     for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 	
@@ -1777,7 +1773,6 @@ static PyObject *eikonalvtic_surf(PyObject *self, PyObject *args){
 
 	ndim = 3;
     s = (float**)malloc(nshot * sizeof(float*));
-    int i;
     for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 	
@@ -1917,7 +1912,6 @@ static PyObject *eikonalvtic_oneshot_rtp(PyObject *self, PyObject *args){
 	ndim = 3;
      
     s = (float**)malloc(nshot * sizeof(float*));
-    int i;
     for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 
@@ -2044,7 +2038,6 @@ static PyObject *eikonalvtic_multishots_rtp(PyObject *self, PyObject *args){
 
 	ndim = 3; 
     s = (float**)malloc(nshot * sizeof(float*));
-    int i;
     for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 	
