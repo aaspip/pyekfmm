@@ -708,7 +708,8 @@ static PyObject *eikonalc_oneshot(PyObject *self, PyObject *args){
 	ndim = 3;
      
     s = (float**)malloc(nshot * sizeof(float*));
-    for (int i = 0; i < nshot; i++)
+    int i;
+    for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 
 	s[0][0]=x;
@@ -829,7 +830,8 @@ static PyObject *eikonalc_oneshot_angle(PyObject *self, PyObject *args){
 	ndim = 3;
      
     s = (float**)malloc(nshot * sizeof(float*));
-    for (int i = 0; i < nshot; i++)
+    int i;
+    for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 
 	s[0][0]=x;
@@ -1063,7 +1065,8 @@ static PyObject *eikonalc_multishots(PyObject *self, PyObject *args){
 
 	ndim = 3; 
     s = (float**)malloc(nshot * sizeof(float*));
-    for (int i = 0; i < nshot; i++)
+    int i;
+    for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 	
 
@@ -1199,7 +1202,8 @@ static PyObject *eikonalc_multishots_angle(PyObject *self, PyObject *args){
 
 	ndim = 3; 
     s = (float**)malloc(nshot * sizeof(float*));
-    for (int i = 0; i < nshot; i++)
+    int i;
+    for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 	
 
@@ -1379,7 +1383,8 @@ static PyObject *eikonalc_surf(PyObject *self, PyObject *args){
 
 	ndim = 3;
     s = (float**)malloc(nshot * sizeof(float*));
-    for (int i = 0; i < nshot; i++)
+    int i;
+    for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 	
 
@@ -1518,7 +1523,8 @@ static PyObject *eikonalc_oneshot_rtp(PyObject *self, PyObject *args){
 	ndim = 3;
      
     s = (float**)malloc(nshot * sizeof(float*));
-    for (int i = 0; i < nshot; i++)
+    int i;
+    for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 
 	s[0][0]=x; /*r*/
@@ -1644,7 +1650,8 @@ static PyObject *eikonalc_multishots_rtp(PyObject *self, PyObject *args){
 
 	ndim = 3; 
     s = (float**)malloc(nshot * sizeof(float*));
-    for (int i = 0; i < nshot; i++)
+    int i;
+    for (i = 0; i < nshot; i++)
         s[i] = (float*)malloc(ndim * sizeof(float));
 	
 
