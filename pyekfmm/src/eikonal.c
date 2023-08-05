@@ -759,6 +759,9 @@ static PyObject *eikonalc_oneshot(PyObject *self, PyObject *args){
 	
 	for(i=0;i<dims[0];i++)
 		(*((float*)PyArray_GETPTR1(vecout,i))) = t[i];
+
+	free(*s);free(s);free(t);free(v);free(p);
+	fastmarch_close();
 	
 	return PyArray_Return(vecout);
 	
@@ -987,7 +990,10 @@ static PyObject *eikonalc_oneshot_angle(PyObject *self, PyObject *args){
 		(*((float*)PyArray_GETPTR1(vecout,i+n1*n2*n3*nshot))) = dip[i];
 	for(i=0;i<n1*n2*n3*nshot;i++)
 		(*((float*)PyArray_GETPTR1(vecout,i+n1*n2*n3*nshot*2))) = azim[i];
-		
+
+	free(*s);free(s);free(t);free(v);free(p);free(dip);free(azim);
+	fastmarch_close();
+	
 	return PyArray_Return(vecout);
 	
 }
@@ -1122,6 +1128,9 @@ static PyObject *eikonalc_multishots(PyObject *self, PyObject *args){
 	vecout=(PyArrayObject *) PyArray_SimpleNew(1,dims,NPY_FLOAT);
 	for(i=0;i<dims[0];i++)
 		(*((float*)PyArray_GETPTR1(vecout,i))) = t[i];
+
+	free(*s);free(s);free(t);free(v);free(p);free(x);free(y);free(z);
+	fastmarch_close();
 	
 	return PyArray_Return(vecout);
 	
@@ -1306,6 +1315,9 @@ static PyObject *eikonalc_multishots_angle(PyObject *self, PyObject *args){
 	for(i=0;i<n1*n2*n3*nshot;i++)
 		(*((float*)PyArray_GETPTR1(vecout,i+n1*n2*n3*nshot*2))) = azim[i];
 	
+	free(*s);free(s);free(t);free(v);free(p);free(x);free(y);free(z);free(dip);free(azim);
+	fastmarch_close();
+	
 	return PyArray_Return(vecout);
 	
 }
@@ -1447,6 +1459,10 @@ static PyObject *eikonalc_surf(PyObject *self, PyObject *args){
 	vecout=(PyArrayObject *) PyArray_SimpleNew(1,dims,NPY_FLOAT);
 	for(i=0;i<dims[0];i++)
 		(*((float*)PyArray_GETPTR1(vecout,i))) = tt[i];
+		
+	free(*s);free(s);free(t);free(v);free(p);free(x);free(y);free(z);
+	fastmarch_close();
+		
 	return PyArray_Return(vecout);
 	
 	
@@ -1569,6 +1585,9 @@ static PyObject *eikonalc_oneshot_rtp(PyObject *self, PyObject *args){
 	
 	for(i=0;i<dims[0];i++)
 		(*((float*)PyArray_GETPTR1(vecout,i))) = t[i];
+	
+	free(*s);free(s);free(t);free(v);free(p);
+	fastmarch_close();
 	
 	return PyArray_Return(vecout);
 	
@@ -1703,6 +1722,9 @@ static PyObject *eikonalc_multishots_rtp(PyObject *self, PyObject *args){
 	vecout=(PyArrayObject *) PyArray_SimpleNew(1,dims,NPY_FLOAT);
 	for(i=0;i<dims[0];i++)
 		(*((float*)PyArray_GETPTR1(vecout,i))) = t[i];
+
+	free(*s);free(s);free(t);free(v);free(p);free(x);free(y);free(z);
+	fastmarch_close();
 	
 	return PyArray_Return(vecout);
 	
