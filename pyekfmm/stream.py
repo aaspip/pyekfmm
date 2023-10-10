@@ -69,8 +69,8 @@ def stream3d(u,v, w, sx, sy, sz, step=0.1, maxvert=10000):
 	 demos/test_xxx.py
 	"""
 	
-	xSize=u.shape[1]
-	ySize=u.shape[0]
+	xSize=u.shape[0]
+	ySize=u.shape[1]
 	zSize=u.shape[2]
 	print(sx,sy,sz)
 	[verts, numverts] = traceStreamUVW  (u.flatten(order='F'),v.flatten(order='F'),w.flatten(order='F'), xSize, ySize, zSize, sx, sy, sz, step, maxvert);
@@ -170,13 +170,13 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, sx, sy, step, maxvert):
 	
 	return verts,numverts
 
-def traceStreamUVW (ugrid, vgrid, wgrid, xdim, ydim, zdim, sx, sy, sz, step, maxvert):
+def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, maxvert):
 	"""
 	traceStreamUVW: 3D streamline
 	
 	INPUT
-	ugrid:   	derivative of traveltime in x
 	vgrid:   	derivative of traveltime in y
+	ugrid:   	derivative of traveltime in x
 	wgrid:   	derivative of traveltime in z
 	
 	OUTPUT  
@@ -237,14 +237,14 @@ def traceStreamUVW (ugrid, vgrid, wgrid, xdim, ydim, zdim, sx, sy, sz, step, max
 		g=(1-xfrac)*(  yfrac)*(  zfrac);
 		h=(  xfrac)*(  yfrac)*(  zfrac);
 		
-		verts[3*numverts + 0] = x+1;
-		verts[3*numverts + 1] = y+1;
+		verts[3*numverts + 0] = y+1;
+		verts[3*numverts + 1] = x+1;
 		verts[3*numverts + 2] = z+1;
 		#if already been here, done
 		if numverts>=2:
 			if verts[3*numverts] == verts[3*(numverts-2)] and verts[3*numverts+1] == verts[3*(numverts-2)+1] and verts[3*numverts+2] == verts[3*(numverts-2)+2]:
 				numverts=numverts+1;
-# 				print("Second break");
+				print("Second break");
 				break;
 		
 		numverts=numverts+1;
@@ -275,7 +275,7 @@ def traceStreamUVW (ugrid, vgrid, wgrid, xdim, ydim, zdim, sx, sy, sz, step, max
 		y = y+vi;
 		z = z+wi;
 
-	verts=verts[0:3*numverts]
+	verts=verts[0:3*numverts] 
 	
 	return verts,numverts
 	
