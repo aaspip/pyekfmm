@@ -348,3 +348,77 @@ plt.savefig('test_pyekfmm_fig4_xnoty.pdf',format='pdf',dpi=300,bbox_inches='tigh
 # Show Figure
 plt.show()
 
+
+######
+#Below is a more integrated way
+######
+import pyekfmm as fmm
+import numpy as np
+import matplotlib.pyplot as plt
+
+### 3D grid (currently only allow dx=dy=dz)
+v1=1;
+v2=3;
+nz=101;
+nx=101;
+ny=101;
+dx=0.01;
+dz=0.01;
+dy=0.01;
+sx=0;
+sy=0.5;
+sz=0;
+
+## create or load velocity model [z,x,y]
+v=np.linspace(v1,v2,nz);
+v=np.expand_dims(v,1);
+h=np.ones([1,nx])
+vel=np.multiply(v,h,dtype='float32'); #z,x
+vel3d=np.zeros([nz,nx,ny],dtype='float32');
+for ii in range(ny):
+	vel3d[:,:,ii]=vel
+
+## velocity dimension swap [z,x,y] -> [x,y,z]
+vxyz=np.swapaxes(np.swapaxes(vel3d,0,1),1,2);
+
+## FMM calculation
+t=fmm.eikonal(vxyz.flatten(order='F'),xyz=np.array([sx,sy,sz]),ax=[0,dx,nx],ay=[0,dy,ny],az=[0,dz,nz],order=2);
+time=t.reshape(nx,ny,nz,order='F');#first axis (vertical) is x, second is y, third is z
+tzxy=np.swapaxes(np.swapaxes(time,1,2),0,1);
+
+## plot 3D velocity model
+from pyekfmm import plot3d
+# plot3d(tzxy,cmap=plt.cm.jet,barlabel='Traveltime (s)',figname='vel3d.png',format='png',dpi=300)
+plot3d(tzxy,nlevel=10,cmap=plt.cm.jet,barlabel='Traveltime (s)',showf=False,close=False);
+plt.gca().set_xlabel("X (km)",fontsize='large', fontweight='normal')
+plt.gca().set_ylabel("Y (km)",fontsize='large', fontweight='normal')
+plt.gca().set_zlabel("Z (km)",fontsize='large', fontweight='normal')
+plt.show()
+
+# plot3d(vel3d,cmap=plt.cm.jet,barlabel='Velocity (km/s)',figname='vel3d.png',format='png',dpi=300)#,figname='time3d.png',format='png',dpi=300)
+plot3d(vel3d,nlevel=100,cmap=plt.cm.jet,barlabel='Velocity',showf=False,close=False);
+plt.gca().set_xlabel("X (km)",fontsize='large', fontweight='normal')
+plt.gca().set_ylabel("Y (km)",fontsize='large', fontweight='normal')
+plt.gca().set_zlabel("Z (km)",fontsize='large', fontweight='normal')
+plt.show()
+
+# Ray tracing and plotting
+from pyekfmm import ray3d
+plot3d(tzxy,nlevel=10,cmap=plt.cm.jet,barlabel='Traveltime (s)',showf=False,close=False,alpha=0.7);
+rx=1;
+ry=0.5;
+z=np.linspace(0,1.0,11);
+for zi in z:
+	paths=ray3d(time,source=[sx,sy,sz],receiver=[rx,ry,zi],trim=0.5,ax=[0,dx,nx],ay=[0,dy,ny],az=[0,dz,nz])
+	plt.plot(rx,ry,zi,'vb',markersize=10);
+	## plot rays
+	plt.plot(paths[0,:],paths[1,:],paths[2,:],'g--',markersize=20);
+
+plt.savefig('raytracing3d.png',format='png',dpi=300)
+# Show Figure
+plt.show()
+
+
+
+
+
