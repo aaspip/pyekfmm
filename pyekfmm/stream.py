@@ -72,7 +72,6 @@ def stream3d(u,v, w, sx, sy, sz, step=0.1, maxvert=10000):
 	xSize=u.shape[0]
 	ySize=u.shape[1]
 	zSize=u.shape[2]
-	print(sx,sy,sz)
 	[verts, numverts] = traceStreamUVW  (u.flatten(order='F'),v.flatten(order='F'),w.flatten(order='F'), xSize, ySize, zSize, sx, sy, sz, step, maxvert);
 	verts=verts.reshape(3,numverts,order='F');
 	
@@ -207,8 +206,14 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, ma
 	verts=np.zeros([3*maxvert,1])
 
 	while 1:
-		if (x<0 or x>xdim or y<0 or y>ydim or z<0 or z>zdim or numverts>=maxvert) : 
-# 			print("First break");
+		if x<0:
+			x=0;
+		if y<0:
+			y=0;
+		if z<0:
+			z=0;
+		if (x<0 or x>xdim or y<0 or y>ydim or z<0 or z>zdim or numverts>=maxvert) :
+			print("First break");
 			break;
 
 		ix=int(np.floor(x))
@@ -309,8 +314,49 @@ def trimrays(paths, start_points, T=None):
 	
 	
 	
+def ray3d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],step=0.1,maxvert=10000,**kws):
+	'''
+	ray3d: 3D ray tracing
 	
+	INPUT
+	time: 3D traveltime
+	source: 	source location [sx,sy,sz]
+	receiver: receiver location [rx,ry,rz]
+	ax=[0,dx,nx],ay=[0,dy,ny],az=[0,dz,nz]
+	step:ray segment increase
+	maxvert: maximum number of verts
 	
+	kws:	other key words (e.g., trim=0.5)
+	
+	OUTPUT
+	paths: ray paths [x,y,z]
+	'''
+	
+	## Gradient calculation
+	tx,ty,tz = np.gradient(time)
+	dx=ax[1];dy=ay[1];dz=az[1];
+	
+	receiverx=(receiver[0]-ax[0])/ax[1]+1
+	receivery=(receiver[1]-ay[0])/ay[1]+1
+	receiverz=(receiver[2]-az[0])/az[1]+1
+	
+	paths,nrays=stream3d(-tx,-ty, -tz, receiverx, receivery, receiverz, step=step, maxvert=maxvert)
+	
+	if 'trim' in kws.keys():
+		sourcex=(source[0]-ax[0])/ax[1]+1
+		sourcey=(source[1]-ay[0])/ay[1]+1
+		sourcez=(source[2]-az[0])/az[1]+1
+		
+		print('Before trim',paths.shape)
+		## trim the rays and add the source point
+		paths=trimrays(paths,start_points=np.array([sourcex,sourcey,sourcez]),T=0.5)
+		print('After trim',paths.shape)
+
+	paths[0,:]=(paths[0,:]-1)*dx;
+	paths[1,:]=(paths[1,:]-1)*dy;
+	paths[2,:]=(paths[2,:]-1)*dz;
+	
+	return paths	
 	
 	
 	

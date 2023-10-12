@@ -8,7 +8,7 @@
     (http://www.gnu.org/copyleft/gpl.html)
 """
 
-__version__ = "0.0.8"
+__version__ = "0.0.9"
 
 from .fmm import eikonal
 from .fmm import eikonal_surf
@@ -26,9 +26,9 @@ from eikonalvtic import *
 from .stream import stream2d
 from .stream import stream3d
 from .stream import trimrays
+from .stream import ray3d
 
-
-
+from .plot import plot3d
 
 
 
