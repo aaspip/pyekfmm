@@ -48,6 +48,12 @@ or using Pypi
     The "demo" directory contains all runable scripts to demonstrate different applications of pyekfmm. 
 
 -----------
+## Notebook tutorials
+Some notebook tutorials are stored separately to ensure the minimal size of the pyekfmm package. They can be found at 
+
+	https://github.com/aaspip/notebook/blob/main/pyekfmm
+
+-----------
 ## Dependence Packages
 * scipy 
 * numpy 
