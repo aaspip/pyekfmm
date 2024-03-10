@@ -6,6 +6,7 @@
 #include <numpy/arrayobject.h>
 
 #define FMM_HUGE 9999999999999999
+#define M_PI 3.14159265358979323846
 
 /*****pqueue for neighbor***/
 enum {FMM_IN, FMM_FRONT, FMM_OUT};
