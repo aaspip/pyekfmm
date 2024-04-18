@@ -1018,12 +1018,8 @@ static PyObject *eikonalc_multishots(PyObject *self, PyObject *args){
     PyObject *arrf2=NULL;
     PyObject *arrf3=NULL;
 
-	eikonalc_multishots(vel,x,y,z,ax[0],ay[0],az[0],ax[1],ay[1],az[1],ax[2],ay[2],az[2],order,verb);
-	
 	PyArg_ParseTuple(args, "OOOOffffffiiiii", &arg1, &f1, &f2, &f3, &f4, &f5, &f6, &f7, &f8, &f9, &f10, &f11, &f12, &f13, &f14);
 
-	printf("reading xyz 2\n");
-	
     int b1, b2, b3, n1, n2, n3, nshot, ndim, i, is,order,n123, *p, verb;
     float br1, br2, br3, o1, o2, o3, d1, d2, d3;
     float **s, *t, *v;
@@ -1101,7 +1097,7 @@ static PyObject *eikonalc_multishots(PyObject *self, PyObject *args){
         v[i]=*((float*)PyArray_GETPTR1(arr1,i));
         v[i] = 1./(v[i]*v[i]);
     }
-	printf("reading xyz begin\n");
+
 	/*reading xyz*/
     for (i=0; i<nshot; i++)
     {
@@ -1109,7 +1105,7 @@ static PyObject *eikonalc_multishots(PyObject *self, PyObject *args){
         s[i][1]=*((float*)PyArray_GETPTR1(arrf2,i));
         s[i][2]=*((float*)PyArray_GETPTR1(arrf3,i));
     }
-	printf("reading xyz done\n");
+	
     fastmarch_init (n3,n2,n1);
  
     /* loop over shots */
@@ -1123,7 +1119,7 @@ static PyObject *eikonalc_multishots(PyObject *self, PyObject *args){
 		      b3,b2,b1,
 		      order);
     }
-	printf("reading xyz 2\n");
+    
     /*Below is the output part*/
     PyArrayObject *vecout;
 	npy_intp dims[2];
