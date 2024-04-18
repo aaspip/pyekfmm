@@ -9,6 +9,8 @@ def eikonal(vel,xyz,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],order=2,verb
 	ay: axis y [oy,dy,ny]
 	az: axis z [oz,dz,nz]
 	order: accuracy order [1 or 2]
+	verb: verbosity
+	angle: if output the dip and azimuth
 	
 	OUTPUT
 	times: traveltime in xyz respectively (1D numpy array)
@@ -39,22 +41,36 @@ def eikonal(vel,xyz,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],order=2,verb
 		else:
 			times=eikonalc_oneshot(vel,x,y,z,ax[0],ay[0],az[0],ax[1],ay[1],az[1],ax[2],ay[2],az[2],order);
 	else:
+		print('x,y,z')
 		from eikonalc import eikonalc_multishots
+		
 		[ne,ndim]=xyz.shape;#ndim must be 3
 		x=xyz[:,0];y=xyz[:,1];z=xyz[:,2];
+		
+		print(x,y,z)
 		x=np.expand_dims(x,1);
 		y=np.expand_dims(y,1);
 		z=np.expand_dims(z,1);
 		
+# 		x=x.flatten(order='F')
+# 		y=y.flatten(order='F')
+# 		z=z.flatten(order='F')
+
+		print(x)
+		print(y)
+		print(z)
+		print('HH')
 		if angle:
+			print('hhh')
 			from eikonalc import eikonalc_multishots_angle
 			n123=vel.size
 			tmp=eikonalc_multishots_angle(vel,x,y,z,ax[0],ay[0],az[0],ax[1],ay[1],az[1],ax[2],ay[2],az[2],order,verb);
 			times=tmp[0:n123*ne]
 			dips=tmp[n123*ne:n123*ne*2]
 			azims=tmp[n123*ne*2:]
-			
+			print('hhh2')
 		else:
+			print('hhh3')
 			times=eikonalc_multishots(vel,x,y,z,ax[0],ay[0],az[0],ax[1],ay[1],az[1],ax[2],ay[2],az[2],order,verb);
 	
 	if angle:
