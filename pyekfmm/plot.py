@@ -10,7 +10,7 @@ def cseis():
 	June, 2022
 	
 	EXAMPLE
-	from pyseistr import cseis
+	from pyekfmm import cseis
 	import numpy as np
 	from matplotlib import pyplot as plt
 	plt.imshow(np.random.randn(100,100),cmap=cseis())
@@ -23,8 +23,7 @@ np.concatenate((np.zeros([1,40]),np.expand_dims(np.linspace(0,1,88),axis=1).tran
 
 	return ListedColormap(seis)
 	
-
-def plot3d(d3d,frames=None,z=None,x=None,y=None,dz=0.01,dx=0.01,dy=0.01,nlevel=100,figname=None,showf=True,close=True,**kwargs):
+def plot3d(d3d,frames=None,z=None,x=None,y=None,dz=0.01,dx=0.01,dy=0.01,nlevel=100,figsize=(8, 6),figname=None,showf=True,close=True,**kwargs):
 	'''
 	plot3d: plot beautiful 3D slices
 	
@@ -44,14 +43,43 @@ def plot3d(d3d,frames=None,z=None,x=None,y=None,dz=0.01,dx=0.01,dy=0.01,nlevel=1
 	EXAMPLE 1
 	import numpy as np
 	d3d=np.random.rand(100,100,100);
-	from pyseistr import plot3d
+	from pyekfmm import plot3d
 	plot3d(d3d);
 	
 	EXAMPLE 2
 	import scipy
 	data=scipy.io.loadmat('/Users/chenyk/chenyk/matlibcyk/test/hyper3d.mat')['cmp']
-	from pyseistr import plot3d
+	from pyekfmm import plot3d
 	plot3d(data);
+	
+	EXAMPLE 3
+	import numpy as np
+	import matplotlib.pyplot as plt
+	from pyekfmm import plot3d
+
+	nz=81
+	nx=81
+	ny=81
+	dz=20
+	dx=20
+	dy=20
+	nt=1501
+	dt=0.001
+
+	v=np.arange(nz)*20*1.2+1500;
+	vel=np.zeros([nz,nx,ny]);
+	for ii in range(nx):
+		for jj in range(ny):
+			vel[:,ii,jj]=v;
+
+	plot3d(vel,figsize=(16,10),cmap=plt.cm.jet,z=np.arange(nz)*dz,x=np.arange(nx)*dz,y=np.arange(nz)*dz,barlabel='Velocity (m/s)',showf=False,close=False)
+	plt.gca().set_xlabel("X (m)",fontsize='large', fontweight='normal')
+	plt.gca().set_ylabel("Y (m)",fontsize='large', fontweight='normal')
+	plt.gca().set_zlabel("Z (m)",fontsize='large', fontweight='normal')
+	plt.title('3D velocity model')
+	plt.savefig(fname='vel3d.png',format='png',dpi=300)
+	plt.show()
+	
 	'''
 
 	[nz,nx,ny] = d3d.shape;
@@ -72,20 +100,20 @@ def plot3d(d3d,frames=None,z=None,x=None,y=None,dz=0.01,dx=0.01,dy=0.01,nlevel=1
 	
 	d3d=d3d.transpose([1,2,0])
 	
+	
 	kw = {
     'vmin': d3d.min(),
     'vmax': d3d.max(),
     'levels': np.linspace(d3d.min(), d3d.max(), nlevel),
     'cmap':cseis()
 	}
-
-	kwargs.update(kw)
-	kw=kwargs
+	
+	kw.update(kwargs)
 	
 	if 'alpha' not in kw.keys():
 		kw['alpha']=1.0
 	
-	fig = plt.figure(figsize=(8, 6))
+	fig = plt.figure(figsize=figsize)
 	ax = fig.add_subplot(111, aspect='auto',projection='3d')
 	plt.jet()
 
@@ -122,8 +150,8 @@ def plot3d(d3d,frames=None,z=None,x=None,y=None,dz=0.01,dx=0.01,dy=0.01,nlevel=1
 		kwargs.__delitem__('barlabel')
 
 	if figname is not None:
-		kwargs.__delitem__('cmap')
-# 		print(kwargs)
+		if 'cmap' in kwargs.keys():
+			kwargs.__delitem__('cmap')
 		plt.savefig(figname,**kwargs)
 	
 	if showf:
@@ -143,8 +171,8 @@ def framebox(x1,x2,y1,y2,c=None,lw=None):
 	x1,x2,y1,y2: intuitive
 	
 	EXAMPLE I
-	from pyseistr.plot import framebox
-	from pyseistr.synthetics import gensyn
+	from pyekfmm.plot import framebox
+	from pyekfmm.synthetics import gensyn
 	from matplotlib import pyplot as plt
 	d=gensyn();
 	plt.imshow(d);
@@ -152,8 +180,8 @@ def framebox(x1,x2,y1,y2,c=None,lw=None):
 	plt.show()
 
 	EXAMPLE II
-	from pyseistr.plot import framebox
-	from pyseistr.synthetics import gensyn
+	from pyekfmm.plot import framebox
+	from pyekfmm.synthetics import gensyn
 	from matplotlib import pyplot as plt
 	d=gensyn();
 	plt.imshow(d);
