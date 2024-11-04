@@ -6,7 +6,9 @@
 #include <numpy/arrayobject.h>
 
 #define FMM_HUGE 9999999999999999
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
 
 /*****pqueue for neighbor***/
 enum {FMM_IN, FMM_FRONT, FMM_OUT};
@@ -343,13 +345,13 @@ static float qsolve(int i)
 static float qsolve_rtp(int i)
 /* find new traveltime at gridpoint i */
 {
-    int j, k, ix, id0, id1, id2;
+    int j, k, ix, id0, id1;
     float a, b, t, res;
     struct Upd *v[3], x[3], *xj;
 
 	id0=(i/s[0])%n[0]; /*r index*/
 	id1=(i/s[1])%n[1]; /*t index*/
-	id2=(i/s[2])%n[2]; /*p index*/
+	/*id2=(i/s[2])%n[2];*/ /*p index*/
 
     for (j=0; j<3; j++) {
 	ix = (i/s[j])%n[j];
@@ -1019,7 +1021,6 @@ static PyObject *eikonalvtic_oneshot(PyObject *self, PyObject *args){
 	/**initialize data input**/
     PyObject *arg1=NULL, *arg2=NULL, *arg3=NULL;
     PyObject *arr1=NULL, *arr2=NULL, *arr3=NULL;
-    int nd;
 
 	PyArg_ParseTuple(args, "OOOfffffffffiiii", &arg1, &arg2, &arg3, &f1, &f2, &f3, &f4, &f5, &f6, &f7, &f8, &f9, &f10, &f11, &f12, &f13);
 
@@ -1054,7 +1055,6 @@ static PyObject *eikonalvtic_oneshot(PyObject *self, PyObject *args){
     /*
      * my code starts here
      */
-    nd=PyArray_NDIM(arr1);
     npy_intp *sp=PyArray_SHAPE(arr1);
 
 	br1=d1;
@@ -1090,16 +1090,9 @@ static PyObject *eikonalvtic_oneshot(PyObject *self, PyObject *args){
     t2 = (float*)malloc(n123 * sizeof(float));
 	vz  = (float*)malloc(n123 * sizeof(float));
     vx = (float*)malloc(n123 * sizeof(float));
-	p  = (float*)malloc(n123 * sizeof(float));
+	p  = (int*)malloc(n123 * sizeof(int));
     q  = (float*)malloc(n123 * sizeof(float));
-	
-// 	printf("n123=%d\n",n123);
-// 	printf("x=%g,y=%g,z=%g\n",x,y,z);
-// 	printf("d1=%g,d2=%g,d3=%g\n",d1,d2,d3);
-// 	printf("o1=%g,o2=%g,o3=%g\n",o1,o2,o3);
-// 	printf("n1=%d,n2=%d,n3=%d\n",n1,n2,n3);
-// 	printf("order=%d\n",order);
-	
+
     if (*sp != n123)
     {
     	printf("Dimension mismatch, N_input = %d, N_model = %d \n", *sp, n123);
@@ -1110,21 +1103,18 @@ static PyObject *eikonalvtic_oneshot(PyObject *self, PyObject *args){
     for (i=0; i<n123; i++)
     {
         vx[i]=*((float*)PyArray_GETPTR1(arr2,i));
-//         printf("v[%d]=%g\n",i,v[i]);
         vx[i] = 1./(vx[i]*vx[i]);
     }
 	/*reading velocity, NMO velocity*/
     for (i=0; i<n123; i++)
     {
         vz[i]=*((float*)PyArray_GETPTR1(arr1,i));
-//         printf("vx[%d]=%g\n",i,vx[i]);
         vz[i] = 1./(vz[i]*vz[i]);
     }
     /*reading eta, anisotropy parameter*/
     for (i=0; i<n123; i++)
     {
         q[i]=*((float*)PyArray_GETPTR1(arr3,i));
-//         printf("q[%d]=%g\n",i,q[i]);
         q[i] = 1.+2.*q[i]; /*transform eta to q*/
     }
     
@@ -1168,7 +1158,6 @@ static PyObject *eikonalvtic_oneshot_angle(PyObject *self, PyObject *args){
 	/**initialize data input**/
     PyObject *arg1=NULL;
     PyObject *arr1=NULL;
-    int nd;
 
 	PyArg_ParseTuple(args, "Offfffffffiiii", &arg1, &f1, &f2, &f3, &f4, &f5, &f6, &f7, &f8, &f9, &f10, &f11, &f12, &f13);
 
@@ -1201,7 +1190,6 @@ static PyObject *eikonalvtic_oneshot_angle(PyObject *self, PyObject *args){
     /*
      * my code starts here
      */
-    nd=PyArray_NDIM(arr1);
     npy_intp *sp=PyArray_SHAPE(arr1);
 
 	br1=d1;
@@ -1237,7 +1225,7 @@ static PyObject *eikonalvtic_oneshot_angle(PyObject *self, PyObject *args){
 	dip = (float*)malloc(n123 * sizeof(float));
 	azim = (float*)malloc(n123 * sizeof(float));
 	v = (float*)malloc(n123 * sizeof(float));
-	p = (float*)malloc(n123 * sizeof(float));
+	p = (int*)malloc(n123 * sizeof(int));
 	
 
     if (*sp != n123)
@@ -1397,7 +1385,6 @@ static PyObject *eikonalvtic_multishots(PyObject *self, PyObject *args){
 	/**initialize data input**/
     PyObject *arg1=NULL;
     PyObject *arr1=NULL;
-    int nd, nd2;
     
     PyObject *f1=NULL;
     PyObject *f2=NULL;
@@ -1411,7 +1398,6 @@ static PyObject *eikonalvtic_multishots(PyObject *self, PyObject *args){
     int b1, b2, b3, n1, n2, n3, nshot, ndim, i, is,order,n123, *p, verb;
     float br1, br2, br3, o1, o2, o3, d1, d2, d3;
     float **s, *t, *v;
-    float *x, *y, *z;
     bool plane[3];
     
 	o1=f4;
@@ -1433,9 +1419,6 @@ static PyObject *eikonalvtic_multishots(PyObject *self, PyObject *args){
     arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
     arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_IN_ARRAY);
     arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_IN_ARRAY);
-
-    nd=PyArray_NDIM(arr1);
-    nd2=PyArray_NDIM(arrf1);
     
     npy_intp *sp=PyArray_SHAPE(arr1);
     npy_intp *spxyz=PyArray_SHAPE(arrf1);
@@ -1466,11 +1449,7 @@ static PyObject *eikonalvtic_multishots(PyObject *self, PyObject *args){
 
 	t = (float*)malloc(n123*nshot * sizeof(float));
 	v = (float*)malloc(n123 * sizeof(float));
-	p = (float*)malloc(n123 * sizeof(float));
-
-	x = (float*)malloc(nshot * sizeof(float));
-	y = (float*)malloc(nshot * sizeof(float));
-	z = (float*)malloc(nshot * sizeof(float));
+	p = (int*)malloc(n123 * sizeof(int));
 
 
     if (*sp != n123)
@@ -1533,7 +1512,6 @@ static PyObject *eikonalvtic_multishots_angle(PyObject *self, PyObject *args){
 	/**initialize data input**/
     PyObject *arg1=NULL;
     PyObject *arr1=NULL;
-    int nd, nd2;
     
     PyObject *f1=NULL;
     PyObject *f2=NULL;
@@ -1547,7 +1525,6 @@ static PyObject *eikonalvtic_multishots_angle(PyObject *self, PyObject *args){
     int b1, b2, b3, n1, n2, n3, nshot, ndim, i, is,order,n123, *p, verb;
     float br1, br2, br3, o1, o2, o3, d1, d2, d3;
     float **s, *t, *v, *dip, *azim;
-    float *x, *y, *z;
     bool plane[3];
     
 	o1=f4;
@@ -1569,9 +1546,6 @@ static PyObject *eikonalvtic_multishots_angle(PyObject *self, PyObject *args){
     arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
     arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_IN_ARRAY);
     arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_IN_ARRAY);
-
-    nd=PyArray_NDIM(arr1);
-    nd2=PyArray_NDIM(arrf1);
     
     npy_intp *sp=PyArray_SHAPE(arr1);
     npy_intp *spxyz=PyArray_SHAPE(arrf1);
@@ -1604,12 +1578,7 @@ static PyObject *eikonalvtic_multishots_angle(PyObject *self, PyObject *args){
 	dip = (float*)malloc(n123*nshot * sizeof(float));
 	azim = (float*)malloc(n123*nshot * sizeof(float));
 	v = (float*)malloc(n123 * sizeof(float));
-	p = (float*)malloc(n123 * sizeof(float));
-
-	x = (float*)malloc(nshot * sizeof(float));
-	y = (float*)malloc(nshot * sizeof(float));
-	z = (float*)malloc(nshot * sizeof(float));
-
+	p = (int*)malloc(n123 * sizeof(int));
 
     if (*sp != n123)
     {
@@ -1714,7 +1683,6 @@ static PyObject *eikonalvtic_surf(PyObject *self, PyObject *args){
 	/**initialize data input**/
     PyObject *arg1=NULL;
     PyObject *arr1=NULL;
-    int nd, nd2;
     
     PyObject *f1=NULL;
     PyObject *f2=NULL;
@@ -1728,7 +1696,6 @@ static PyObject *eikonalvtic_surf(PyObject *self, PyObject *args){
     int b1, b2, b3, n1, n2, n3, nshot, ndim, i, is,order,n123, *p, verb;
     float br1, br2, br3, o1, o2, o3, d1, d2, d3;
     float **s, *t, *v;
-    float *x, *y, *z;
     bool plane[3];
     
 	o1=f4;
@@ -1750,9 +1717,6 @@ static PyObject *eikonalvtic_surf(PyObject *self, PyObject *args){
     arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
     arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_IN_ARRAY);
     arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_IN_ARRAY);
-
-    nd=PyArray_NDIM(arr1);
-    nd2=PyArray_NDIM(arrf1);
     
     npy_intp *sp=PyArray_SHAPE(arr1);
     npy_intp *spxyz=PyArray_SHAPE(arrf1);
@@ -1782,12 +1746,7 @@ static PyObject *eikonalvtic_surf(PyObject *self, PyObject *args){
 
 	t = (float*)malloc(n123*nshot * sizeof(float));
 	v = (float*)malloc(n123 * sizeof(float));
-	p = (float*)malloc(n123 * sizeof(float));
-
-	x = (float*)malloc(nshot * sizeof(float));
-	y = (float*)malloc(nshot * sizeof(float));
-	z = (float*)malloc(nshot * sizeof(float));
-
+	p = (int*)malloc(n123 * sizeof(int));
 
     if (*sp != n123)
     {
@@ -1858,7 +1817,6 @@ static PyObject *eikonalvtic_oneshot_rtp(PyObject *self, PyObject *args){
 	/**initialize data input**/
     PyObject *arg1=NULL;
     PyObject *arr1=NULL;
-    int nd;
 
 	PyArg_ParseTuple(args, "Offfffffffiiii", &arg1, &f1, &f2, &f3, &f4, &f5, &f6, &f7, &f8, &f9, &f10, &f11, &f12, &f13);
 
@@ -1890,7 +1848,6 @@ static PyObject *eikonalvtic_oneshot_rtp(PyObject *self, PyObject *args){
     /*
      * my code starts here
      */
-    nd=PyArray_NDIM(arr1);
     npy_intp *sp=PyArray_SHAPE(arr1);
 
 	br1=d1;
@@ -1924,7 +1881,7 @@ static PyObject *eikonalvtic_oneshot_rtp(PyObject *self, PyObject *args){
 
 	t = (float*)malloc(n123 * sizeof(float));
 	v = (float*)malloc(n123 * sizeof(float));
-	p = (float*)malloc(n123 * sizeof(float));
+	p = (int*)malloc(n123 * sizeof(int));
 	
 
     if (*sp != n123)
@@ -1978,7 +1935,6 @@ static PyObject *eikonalvtic_multishots_rtp(PyObject *self, PyObject *args){
 	/**initialize data input**/
     PyObject *arg1=NULL;
     PyObject *arr1=NULL;
-    int nd, nd2;
     
     PyObject *f1=NULL;
     PyObject *f2=NULL;
@@ -1992,7 +1948,6 @@ static PyObject *eikonalvtic_multishots_rtp(PyObject *self, PyObject *args){
     int b1, b2, b3, n1, n2, n3, nshot, ndim, i, is,order,n123, *p, verb;
     float br1, br2, br3, o1, o2, o3, d1, d2, d3;
     float **s, *t, *v;
-    float *x, *y, *z;
     bool plane[3];
     
 	o1=f4;			/*r*/
@@ -2014,9 +1969,6 @@ static PyObject *eikonalvtic_multishots_rtp(PyObject *self, PyObject *args){
     arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
     arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_IN_ARRAY);
     arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_IN_ARRAY);
-
-    nd=PyArray_NDIM(arr1);
-    nd2=PyArray_NDIM(arrf1);
     
     npy_intp *sp=PyArray_SHAPE(arr1);
     npy_intp *spxyz=PyArray_SHAPE(arrf1);
@@ -2047,12 +1999,7 @@ static PyObject *eikonalvtic_multishots_rtp(PyObject *self, PyObject *args){
 
 	t = (float*)malloc(n123*nshot * sizeof(float));
 	v = (float*)malloc(n123 * sizeof(float));
-	p = (float*)malloc(n123 * sizeof(float));
-
-	x = (float*)malloc(nshot * sizeof(float));
-	y = (float*)malloc(nshot * sizeof(float));
-	z = (float*)malloc(nshot * sizeof(float));
-
+	p = (int*)malloc(n123 * sizeof(int));
 
     if (*sp != n123)
     {

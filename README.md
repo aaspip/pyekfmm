@@ -39,9 +39,14 @@ Using the latest version
     git clone https://github.com/aaspip/pyekfmm
     cd pyekfmm
     pip install -v -e .
+
 or using Pypi
 
     pip install pyekfmm
+
+or (recommended, because we update very fast)
+
+	pip install git+https://github.com/aaspip/pyekfmm
 
 -----------
 ## Examples
