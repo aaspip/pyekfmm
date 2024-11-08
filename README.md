@@ -25,14 +25,13 @@ BibTeX:
 -----------
 ## Copyright
     pyekfmm developing team, 2021-present
------------
 
+-----------
 ## License
     GNU General Public License, Version 3
     (http://www.gnu.org/copyleft/gpl.html)   
 
 -----------
-
 ## Install
 Using the latest version
 
@@ -47,6 +46,12 @@ or using Pypi
 or (recommended, because we update very fast)
 
 	pip install git+https://github.com/aaspip/pyekfmm
+
+
+-----------
+## Verified runnable OS
+Mac OS, Linux, Windows (need Microsoft C++ Build Tools)
+
 
 -----------
 ## Examples
