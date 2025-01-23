@@ -48,3 +48,73 @@ plt.show()
 print(['Testing result:',time.max(),time.min(),time.std(),time.var()])
 print(['Correct result:',2.1797864, 0.0, 0.44571817, 0.19866468])
 
+
+##########################################################################################
+### Below is comparison with scikit-fmm
+##########################################################################################
+# pip install scikit-fmm
+import skfmm
+
+nx=201;nz=201;
+xs=5;zs=5;dx=0.05;dz=0.05;ox=0;oz=0;
+phi = np.ones((nx, nz))
+# phi[int(xs // dx), int(zs // dz)] = -1.
+phi[100, 100] = -1.
+time_skfmm = skfmm.travel_time(phi, velz.reshape(201,201,order='F'), dx=(dx, dz))
+
+time_true=np.zeros([nx,nz]);
+for ii in range(nz):
+	for jj in range(nx):
+		time_true[jj,ii] = np.sqrt((ox+jj*dx-xs)*(ox+jj*dx-xs)+(oz+ii*dz-zs)*(oz+ii*dz-zs))/3.09354;
+
+
+import matplotlib.pyplot as plt
+fig = plt.figure(figsize=(12, 12))
+ax = fig.add_subplot(221,aspect=1.0)
+plt.imshow(time0.transpose(),clim=(0, 2),extent=[0,10,10,0])
+plt.plot(5,5,'*r',markersize=10)
+plt.xlabel('X (km)');plt.ylabel('Z (km)');
+plt.jet()
+plt.gca().invert_yaxis()
+plt.gca().text(-0.15,1,'a)',transform=plt.gca().transAxes,size=20,weight='normal')
+plt.title('Traveltime (Pyekfmm)');
+
+ax = fig.add_subplot(222,aspect=1.0)
+plt.imshow(time_skfmm.transpose(),clim=(0, 2),extent=[0,10,10,0])
+plt.plot(5,5,'*r',markersize=10)
+plt.xlabel('X (km)');plt.ylabel('Z (km)');
+plt.jet()
+plt.gca().invert_yaxis()
+plt.gca().text(-0.15,1,'b)',transform=plt.gca().transAxes,size=20,weight='normal')
+plt.title('Traveltime (skfmm)');
+
+ax = fig.add_subplot(223,aspect=1.0)
+plt.imshow(np.abs(time_true.transpose()-time0.transpose())*100,clim=(0, 2),extent=[0,10,10,0])
+plt.plot(5,5,'*r',markersize=10)
+plt.xlabel('X (km)');plt.ylabel('Z (km)');
+plt.jet()
+plt.gca().invert_yaxis()
+plt.gca().text(-0.15,1,'c)',transform=plt.gca().transAxes,size=20,weight='normal')
+plt.title('Error*100 (Pyekfmm, MAE=%g)'%np.abs(time_true.transpose()-time0.transpose()).mean());
+
+ax = fig.add_subplot(224,aspect=1.0)
+plt.imshow(np.abs(time_true.transpose()-time_skfmm.transpose())*100,clim=(0, 2),extent=[0,10,10,0])
+
+plt.plot(5,5,'*r',markersize=10)
+plt.xlabel('X (km)');plt.ylabel('Z (km)');
+plt.jet()
+plt.gca().invert_yaxis()
+plt.gca().text(-0.15,1,'d)',transform=plt.gca().transAxes,size=20,weight='normal')
+plt.title('Error*100 (skfmm, MAE=%g)'%np.abs(time_true.transpose()-time_skfmm.transpose()).mean());
+
+plt.colorbar(orientation='horizontal',cax=fig.add_axes([0.37,0.07,0.3,0.02]),shrink=1,label='Traveltime (s)');
+plt.savefig('test_pyekfmm_fig1-comp.png',format='png',dpi=300,bbox_inches='tight', pad_inches=0)
+plt.show()
+
+
+#order=1: Pyekfmm: MAE=0.0129547
+#order=2: Pyekfmm: MAE=0.00265566
+#skfmm: MAE=0.00540868
+
+
+
