@@ -26,6 +26,8 @@ def eikonalvti(velx,velz,eta,xyz,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]
 	[1] By Yangkang Chen, Sep, 2022
 	
 	'''
+	velx=velx.flatten(order='F').astype('float32')
+	velz=velz.flatten(order='F').astype('float32')
 	import numpy as np
 	if xyz.size == 3:
 		from eikonalvtic import eikonalvtic_oneshot
@@ -91,6 +93,8 @@ def eikonalvti_surf(vel,xyz,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],orde
 	MODIFICATIONS
 	[1] By Yangkang Chen, Sep, 2022
 	'''
+	velx=velx.flatten(order='F').astype('float32')
+	velz=velz.flatten(order='F').astype('float32')
 	from eikonalc import eikonalc_surf
 	[ne,ndim]=xyz.shape;#ndim must be 3
 	x=xyz[:,0];y=xyz[:,1];z=xyz[:,2];
@@ -124,6 +128,8 @@ def eikonalvti_rtp(vel,rtp,ar=[0,0.01,101],at=[0,1.8,101],ap=[0,3.6,101],order=2
 	[1] By Yangkang Chen, Sep, 2022
 	
 	'''
+	velx=velx.flatten(order='F').astype('float32')
+	velz=velz.flatten(order='F').astype('float32')
 	import numpy as np
 	if rtp.size == 3:
 		from eikonalc import eikonalc_oneshot_rtp

@@ -895,10 +895,12 @@ static PyObject *eikonalc_oneshot_angle(PyObject *self, PyObject *args){
     
     if(if2d==0) /*3D version*/
     for(is=0;is<nshot;is++)
+    {
 	for(i1=1;i1<n1-1;i1++) /*x*/
 	for(i2=1;i2<n2-1;i2++) /*y*/
 	for(i3=1;i3<n3-1;i3++) /*z*/
     	{
+    	
     	/*reverse sign to get take-off angle*/
     	grad1=-((t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]-t[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3])/d1 + 
     		  (t[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3]-t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3])/d1)/2.0;
@@ -915,7 +917,161 @@ static PyObject *eikonalc_oneshot_angle(PyObject *self, PyObject *args){
     	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = atan2(grad1, grad2) / cRPD;
     	if (azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] < 0.0)
         	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] += 360.0;
+        	
     	}
+    /*boundary*/
+	for(i1=0;i1<n1;i1++) /*x*/
+	for(i2=0;i2<n2;i2++) /*y*/
+	for(i3=0;i3<n3;i3++) /*z*/
+	{
+		if(i1==0) /*on each edge plane, a total of 6 edge planes*/
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+		}
+		
+		if(i1==n1-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+		}
+
+		if(i2==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3];
+		}
+		
+		if(i2==n2-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3];
+		}
+		
+		if(i3==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3];
+		}
+		
+		if(i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3];
+		}
+	}
+	
+	for(i1=0;i1<n1;i1++) /*x*/
+	for(i2=0;i2<n2;i2++) /*y*/
+	for(i3=0;i3<n3;i3++) /*z*/
+	{
+		if(i1==0 && i2==0) /*on each edge line, a total 12 edge line*/
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		}
+
+		if(i1==0 && i2==n2-1) /*on each line*/
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==0 && i3==0) /*on each line*/
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==0 && i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==n1-1 && i2==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==n1-1 && i2==n2-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==n1-1 && i3==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		}
+
+		if(i1==n1-1 && i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		}
+
+		if(i2==0 && i3==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i2==0 && i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i2==n2-1 && i3==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i2==n2-1 && i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		}
+	}
+	
+	/*for 8 edge points*/
+	i1=0;i2=0;i3=0;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+
+	i1=0;i2=0;i3=n3-1;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=0;i2=n2-1;i3=0;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+
+	i1=0;i2=n2-1;i3=n3-1;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=n1-1;i2=0;i3=0;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=n1-1;i2=0;i3=n3-1;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=n1-1;i2=n2-1;i3=0;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=n1-1;i2=n2-1;i3=n3-1;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+    }
     else /*2D version*/
     for(is=0;is<nshot;is++)
 	for(i1=0;i1<n1;i1++) /*x*/
@@ -1243,7 +1399,7 @@ static PyObject *eikonalc_multishots_angle(PyObject *self, PyObject *args){
     }
     
     
-    int i1,i2,i3;
+    int i1,i2,i3,if2d,iflip;
     float grad1,grad2,grad3;
     float cPI,cRPD;
     
@@ -1254,12 +1410,21 @@ static PyObject *eikonalc_multishots_angle(PyObject *self, PyObject *args){
     for(i=0;i<n123*nshot;i++)
     {dip[i]=200;azim[i]=400;}
     
+    if(n1==1 || n2==1)
+    {
+    if2d=1;	
+    }else{
+    if2d=0; 
+    }
     
+    if(if2d==0) /*3D version*/
     for(is=0;is<nshot;is++)
+    {
 	for(i1=1;i1<n1-1;i1++) /*x*/
 	for(i2=1;i2<n2-1;i2++) /*y*/
 	for(i3=1;i3<n3-1;i3++) /*z*/
     	{
+    	
     	/*reverse sign to get take-off angle*/
     	grad1=-((t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]-t[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3])/d1 + 
     		  (t[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3]-t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3])/d1)/2.0;
@@ -1276,11 +1441,221 @@ static PyObject *eikonalc_multishots_angle(PyObject *self, PyObject *args){
     	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = atan2(grad1, grad2) / cRPD;
     	if (azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] < 0.0)
         	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] += 360.0;
+        	
     	}
-    
-    
-    
-    
+    /*boundary*/
+	for(i1=0;i1<n1;i1++) /*x*/
+	for(i2=0;i2<n2;i2++) /*y*/
+	for(i3=0;i3<n3;i3++) /*z*/
+	{
+		if(i1==0) /*on each edge plane, a total of 6 edge planes*/
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+		}
+		
+		if(i1==n1-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+		}
+
+		if(i2==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3];
+		}
+		
+		if(i2==n2-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3];
+		}
+		
+		if(i3==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3];
+		}
+		
+		if(i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3];
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3];
+		}
+	}
+	
+	for(i1=0;i1<n1;i1++) /*x*/
+	for(i2=0;i2<n2;i2++) /*y*/
+	for(i3=0;i3<n3;i3++) /*z*/
+	{
+		if(i1==0 && i2==0) /*on each edge line, a total 12 edge line*/
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		}
+
+		if(i1==0 && i2==n2-1) /*on each line*/
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==0 && i3==0) /*on each line*/
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==0 && i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==n1-1 && i2==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==n1-1 && i2==n2-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i1==n1-1 && i3==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		}
+
+		if(i1==n1-1 && i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		}
+
+		if(i2==0 && i3==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i2==0 && i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i2==n2-1 && i3==0)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]);
+		}
+		
+		if(i2==n2-1 && i3==n3-1)
+		{
+		dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = 0.5*(dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=0.5*(azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3]);
+		}
+	}
+	
+	/*for 8 edge points*/
+	i1=0;i2=0;i3=0;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+
+	i1=0;i2=0;i3=n3-1;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=0;i2=n2-1;i3=0;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+
+	i1=0;i2=n2-1;i3=n3-1;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=n1-1;i2=0;i3=0;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=n1-1;i2=0;i3=n3-1;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=n1-1;i2=n2-1;i3=0;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3])/3.0;
+	
+	i1=n1-1;i2=n2-1;i3=n3-1;
+	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = (dip[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] + dip[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=(azim[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3] +azim[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/3.0;
+    }
+    else /*2D version*/
+    for(is=0;is<nshot;is++)
+	for(i1=0;i1<n1;i1++) /*x*/
+	for(i2=0;i2<n2;i2++) /*y*/
+	for(i3=1;i3<n3-1;i3++) /*z*/
+    	{
+    	
+        if(n1==1)/*y direction*/
+        {
+        if(i2>=1 && i2<n2-1)
+    	grad2=-((t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]-t[i1+(i2-1)*n1+i3*n1*n2+is*n1*n2*n3])/d2 + 
+    		  (t[i1+(i2+1)*n1+i3*n1*n2+is*n1*n2*n3]-t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3])/d2)/2.0;/*y*/
+        }
+        
+        if(n2==1)/*x direction*/
+        {
+        if(i1>=1 && i1<n1-1)
+    	grad1=-((t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]-t[i1-1+i2*n1+i3*n1*n2+is*n1*n2*n3])/d1 + 
+    		  (t[i1+1+i2*n1+i3*n1*n2+is*n1*n2*n3]-t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3])/d1)/2.0;/*x*/
+        }
+    	
+    	grad3=-((t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]-t[i1+i2*n1+(i3-1)*n1*n2+is*n1*n2*n3])/d3 + 
+    		  (t[i1+i2*n1+(i3+1)*n1*n2+is*n1*n2*n3]-t[i1+i2*n1+i3*n1*n2+is*n1*n2*n3])/d3)/2.0;/*z*/
+    	
+    	/* calculate dip angle (range of 0 (down) to 180 (up)) */
+//     	dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3]=atan2(sqrt(grad1 * grad1 + grad2 * grad2), -grad3) / cRPD;
+//     	/* calculate azimuth angle (0 to 360) */
+//     	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = atan2(grad1, grad2) / cRPD;
+//     	if (azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] < 0.0)
+//         	azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] += 360.0;
+//         	
+        
+        /* calculate dip angle (range of 0 (down) to 180 (up)) */
+//         dip = atan2(grady, -gradz) / cRPD;
+        
+        if(n1==1)/*y direction*/
+        {
+        if(i2>=1 && i2<n2-1)
+        dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = atan2(grad2, grad3) / cRPD;
+        }
+        if(n2==1)/*x direction*/
+        {
+        if(i1>=1 && i1<n1-1)
+        dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = atan2(grad1, grad3) / cRPD;
+        }
+        
+        iflip = 0;
+        if (dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] > 180.0) {
+            dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] - 180.0;
+            iflip = 1;
+        } else if (dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] < 0.0) {
+            dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = -dip[i1+i2*n1+i3*n1*n2+is*n1*n2*n3];
+            iflip = 1;
+        }
+        /* calculate azimuth polarity (1 or -1) relative to pos Y dir */
+        azim[i1+i2*n1+i3*n1*n2+is*n1*n2*n3] = iflip ? -1.0 : 1.0;
+        	
+    	}
+
+	
+
     /*Output are time, dip: 0 (down) to 180 (up), azimuth: 0 to 360*/
     
     /*Below is the output part*/
