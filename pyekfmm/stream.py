@@ -7,8 +7,14 @@ def stream2d(u,v, sx, sy, step=0.1, maxvert=10000):
 	INPUT
 	u:   	derivative of traveltime in x
 	v:   	derivative of traveltime in z
+	sx:			source relative coordinate in x [e.g., n.a, n is integer (grid NO) and a is floating number]
+	sy:			source relative coordinate in y  [e.g., n.a, n is integer (grid NO) and a is floating number]
+	step:	ray increment length
+	maxvert: maximum number of verts
 	
 	OUTPUT  
+	verts: verts locations in [x,y,z]
+	numverts: number of verts
 	
 	Copyright (C) 2023 The University of Texas at Austin
 	Copyright (C) 2023 Yangkang Chen
@@ -24,7 +30,7 @@ def stream2d(u,v, sx, sy, step=0.1, maxvert=10000):
 	GNU General Public License for more details: http://www.gnu.org/licenses/
 	
 	References   
-	[1] Chen et al.
+	[1] Chen et al., 2023, Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology, SRL.
 		
 	 DEMO
 	 demos/test_xxx.py
@@ -46,8 +52,15 @@ def stream3d(u,v, w, sx, sy, sz, step=0.1, maxvert=10000):
 	u:   	derivative of traveltime in x
 	v:   	derivative of traveltime in z
 	w:   	derivative of traveltime in y
+	sx:			source relative coordinate in x [e.g., n.a, n is integer (grid NO) and a is floating number]
+	sy:			source relative coordinate in y  [e.g., n.a, n is integer (grid NO) and a is floating number]
+	sz:			source relative coordinate in z  [e.g., n.a, n is integer (grid NO) and a is floating number]
+	step:	ray increment length
+	maxvert: maximum number of verts
 	
 	OUTPUT  
+	verts: verts locations in [x,y,z]
+	numverts: number of verts
 	
 	Copyright (C) 2023 The University of Texas at Austin
 	Copyright (C) 2023 Yangkang Chen
@@ -63,7 +76,7 @@ def stream3d(u,v, w, sx, sy, sz, step=0.1, maxvert=10000):
 	GNU General Public License for more details: http://www.gnu.org/licenses/
 	
 	References   
-	[1] Chen et al.
+	[1] Chen et al., 2023, Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology, SRL.
 		
 	 DEMO
 	 demos/test_xxx.py
@@ -84,8 +97,16 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, sx, sy, step, maxvert):
 	INPUT
 	ugrid:   	derivative of traveltime in x
 	vgrid:   	derivative of traveltime in z
+	xdim:		number of samples in x
+	ydim:		number of samples in y
+	sx:			source relative coordinate in x [e.g., n.a, n is integer (grid NO) and a is floating number]
+	sy:			source relative coordinate in y  [e.g., n.a, n is integer (grid NO) and a is floating number]
+	step:	ray increment length
+	maxvert: maximum number of verts
 	
 	OUTPUT  
+	verts: verts locations in [x,y,z]
+	numverts: number of verts
 	
 	Copyright (C) 2023 The University of Texas at Austin
 	Copyright (C) 2023 Yangkang Chen
@@ -101,7 +122,7 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, sx, sy, step, maxvert):
 	GNU General Public License for more details: http://www.gnu.org/licenses/
 	
 	References   
-	[1] Chen et al., 2023
+	[1] Chen et al., 2023, Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology, SRL.
 		
 	 DEMO
 	 demos/test_xxx.py
@@ -177,8 +198,18 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, ma
 	vgrid:   	derivative of traveltime in y
 	ugrid:   	derivative of traveltime in x
 	wgrid:   	derivative of traveltime in z
+	xdim:		number of samples in x
+	ydim:		number of samples in y
+	zdim:		number of samples in z
+	sx:			source relative coordinate in x [e.g., n.a, n is integer (grid NO) and a is floating number]
+	sy:			source relative coordinate in y  [e.g., n.a, n is integer (grid NO) and a is floating number]
+	sz:			source relative coordinate in z  [e.g., n.a, n is integer (grid NO) and a is floating number]
+	step:	ray increment length
+	maxvert: maximum number of verts
 	
 	OUTPUT  
+	verts: verts locations in [x,y,z]
+	numverts: number of verts
 	
 	Copyright (C) 2023 The University of Texas at Austin
 	Copyright (C) 2023 Yangkang Chen
@@ -194,7 +225,7 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, ma
 	GNU General Public License for more details: http://www.gnu.org/licenses/
 	
 	References   
-	[1] Chen et al., 2023
+	[1] Chen et al., 2023, Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology, SRL.
 		
 	 DEMO
 	 demos/test_xxx.py
@@ -291,10 +322,13 @@ def trimrays(paths, start_points, T=None):
 	"""
 	trimrays: trim rays (remove very close ray points around the source)
 	
+	INPUT
 	%paths: [2 x ngrid]
 	%start_points: [2 x 1], e.g., start_points=np.array([1,1])
 	%T: threshold, e.g., dx,dz
 	
+	OUTPUT
+	paths: 	trimmed rays
 	"""
 	ngrid=paths.shape[1]
 	start_points=np.expand_dims(start_points,1);
@@ -358,10 +392,115 @@ def ray3d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],s
 	
 	return paths	
 	
+def extract(time, point, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
+	'''
+	
+	INPUT
+	time: 	3D traveltime/dip/azimuth [ix,iy,iz] 
+	point: 	point location [x,y,z] for extracting time/dip/azim
+	ax=[0,dx,nx],ay=[0,dy,ny],az=[0,dz,nz]
+	
+	OUTPUT
+	tpoint: time/dip/azim at point [x,y,z]
+	
+	EXAMPLE
+	import pyekfmm as fmm
+	import numpy as np
+
+	vel=3.0*np.ones([101*101*101,1],dtype='float32');
+	t=fmm.eikonal(vel,xyz=np.array([0.5,0,0]),ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],order=2);
+	time=t.reshape(101,101,101,order='F'); #[x,y,z]
+
+	## Verify
+	print(['Testing result:',time.max(),time.min(),time.std(),time.var()])
+	print(['Correct result:',0.49965078, 0.0, 0.08905013, 0.007929926])
+	
+	## Verify (First case on the edge)
+	t1=fmm.extract(time,[0,0,0],ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101])
+	print('Time at [0,0,0] from fmm.extract is:',t1)
+	print('Time at [0,0,0] from time[0,0,0] is:',time[0,0,0])
+
+	t1=fmm.extract(time,[1.0,0,0],ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101])
+	print('Time at [1.0,0,0] from fmm.extract is:',t1)
+	print('Time at [1.0,0,0] from time[100,0,0] is:',time[100,0,0])
+	
+	t1=fmm.extract(time,[1.0,1.0,1.0],ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101])
+	print('Time at [1.0,1.0,1.0] from fmm.extract is:',t1)
+	print('Time at [1.0,1.0,1.0] from time[100,100,100] is:',time[100,100,100])
+
+	## Verify (Then cases between the nodes)
+	t1=fmm.extract(time,[0.505,0,0],ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101])
+	print('Time at [0.505,0,0] from fmm.extract is:',t1)
+	print('Time at [0.505,0,0] analytically is:',0.005/3.0)
+
+	t1=fmm.extract(time,[0.905,0,0],ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101])
+	print('Time at [0.905,0,0] from fmm.extract is:',t1)
+	print('Time at [0.905,0,0] analytically is:',0.405/3.0)
 	
 	
+	#EXAMPLE2
+	vel=3.0*np.ones([101*101*101,1],dtype='float32');
+	t=fmm.eikonal(vel,xyz=np.array([0.505,0,0]),ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],order=2);
+	time=t.reshape(101,101,101,order='F'); #[x,y,z]
+
+	print('Source off-the-grid at 0.505')
+	print('Time at [0.5,0,0] from time[50,0,0] is:',time[50,0,0])
+	print('Time at [0.5,0,0] from time[50,0,0] is:',0.005/3.0)
+	'''
+
+	xdim=time.shape[0]
+	ydim=time.shape[1]
+	zdim=time.shape[2]
 	
+	time=time.flatten(order='F');
 	
+	pointx=(point[0]-ax[0])/ax[1]
+	pointy=(point[1]-ay[0])/ay[1]
+	pointz=(point[2]-az[0])/az[1]
+
+# 	print('point',point)
+# 	print('pointx',pointx)
+	
+	ix=int(np.floor(pointx))
+	iy=int(np.floor(pointy))
+	iz=int(np.floor(pointz))
+	
+	if ix == xdim-1:
+		ix=ix-1;
+		
+	if iy == ydim-1:
+		iy=iy-1;
+
+	if iz == zdim-1:
+		iz=iz-1;
+	
+	xfrac=pointx-ix;
+	yfrac=pointy-iy;
+	zfrac=pointz-iz;
+	
+	#weights for linear interpolation
+	a=(1-xfrac)*(1-yfrac)*(1-zfrac);
+	b=(1-xfrac)*(  yfrac)*(1-zfrac);
+	c=(  xfrac)*(1-yfrac)*(1-zfrac);
+	d=(  xfrac)*(  yfrac)*(1-zfrac);
+	e=(1-xfrac)*(1-yfrac)*(  zfrac);
+	f=(1-xfrac)*(  yfrac)*(  zfrac);
+	g=(  xfrac)*(1-yfrac)*(  zfrac);
+	h=(  xfrac)*(  yfrac)*(  zfrac);
+
+# 	print('xfrac,yfrac,zfrac',xfrac,yfrac,zfrac)
+# 	print('a,b,c,d,e,f,g,h',a,b,c,d,e,f,g,h)
+# 	print('ix,iy,iz',ix,iy,iz)
+	tpoint = time[ix  +xdim*iy 	  +xdim*ydim*iz]*a + \
+			 time[ix  +xdim*(iy+1)+xdim*ydim*iz]*b + \
+			 time[ix+1+xdim*iy    +xdim*ydim*iz]*c + \
+			 time[ix+1+xdim*(iy+1)+xdim*ydim*iz]*d + \
+			 time[ix  +xdim*iy    +xdim*ydim*(iz+1)]*e + \
+			 time[ix  +xdim*(iy+1)+xdim*ydim*(iz+1)]*f + \
+			 time[ix+1+xdim*iy    +xdim*ydim*(iz+1)]*g + \
+			 time[ix+1+xdim*(iy+1)+xdim*ydim*(iz+1)]*h;
+	
+	return tpoint
 	
 	
 	
