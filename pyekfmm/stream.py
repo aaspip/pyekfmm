@@ -394,6 +394,7 @@ def ray3d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],s
 	
 def extract(time, point, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
 	'''
+	extract: extract values (time/dip/azimuth) from 3D array according to the point location [x,y,z] (absolute coordinates)
 	
 	INPUT
 	time: 	3D traveltime/dip/azimuth [ix,iy,iz] 
@@ -504,6 +505,50 @@ def extract(time, point, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
 	
 	
 	
+def extracts(time, points, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
+	'''
+	extracts: extract values (time/dip/azimuth) from 3D array according to the point locations [npoint x 3] (absolute coordinates)
 	
+	INPUT
+	time: 	3D traveltime/dip/azimuth [ix,iy,iz] 
+	points: many point locations [x,y,z] for extracting time/dip/azim
+	ax=[0,dx,nx],ay=[0,dy,ny],az=[0,dz,nz]
+	
+	OUTPUT
+	tpoint: time/dip/azim at point [x,y,z]
+	
+	
+	EXAMPLE
+	import pyekfmm as fmm
+	import numpy as np
+
+	vel=3.0*np.ones([101*101*101,1],dtype='float32');
+	t=fmm.eikonal(vel,xyz=np.array([0.5,0,0]),ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],order=2);
+	time=t.reshape(101,101,101,order='F'); #[x,y,z]
+
+	## Verify
+	print(['Testing result:',time.max(),time.min(),time.std(),time.var()])
+	print(['Correct result:',0.49965078, 0.0, 0.08905013, 0.007929926])
+
+	t1=fmm.extracts(time,np.array([[0.0,0,0],[0.505,0,0]]),ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101])
+	print('Time at [[0.0,0,0],[0.505,0,0]] from fmm.extract is:',t1)
+	print('Time at [[0.0,0,0],[0.505,0,0]] analytically is:',0.5/3.0,0.005/3.0)
+	
+	'''
+	if points.size==3:
+		tpoint=extract(time, points, ax, ay, az)
+	else:
+		[n1,n2]=points.shape
+		if n2 != 3:
+			points=points.T #transpose
+			[n1,n2]=points.shape
+		
+		tpoint=np.zeros(n1)
+		for ii in range(n1):
+			tpoint[ii]=extract(time, points[ii,:], ax, ay, az)
+		
+	return tpoint
+
+		
 	
 	

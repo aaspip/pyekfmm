@@ -28,6 +28,7 @@ from .stream import stream3d
 from .stream import trimrays
 from .stream import ray3d
 from .stream import extract
+from .stream import extracts
 
 from .plot import plot3d
 
