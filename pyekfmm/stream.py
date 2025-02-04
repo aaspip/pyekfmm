@@ -1,6 +1,6 @@
 import numpy as np
 
-def stream2d(u,v, sx, sy, step=0.1, maxvert=10000):
+def stream2d(u,v, dx, dy, sx, sy, step=0.1, maxvert=10000):
 	"""
 	stream2d: draw 2D stream lines along the steepest descent direction
 	
@@ -39,7 +39,7 @@ def stream2d(u,v, sx, sy, step=0.1, maxvert=10000):
 	xSize=u.shape[1]
 	ySize=u.shape[0]
 	
-	[verts, numverts] = traceStreamUV  (u.flatten(order='F'),v.flatten(order='F'),xSize, ySize, sx, sy, step, maxvert);
+	[verts, numverts] = traceStreamUV  (u.flatten(order='F'),v.flatten(order='F'),xSize, ySize, dx, dy, sx, sy, step, maxvert);
 	verts=verts.reshape(2,numverts,order='F');
 	
 	return verts,numverts
@@ -90,7 +90,7 @@ def stream3d(u,v, w, dx, dy, dz, sx, sy, sz, step=0.1, maxvert=10000):
 	
 	return verts,numverts
 	
-def traceStreamUV (ugrid, vgrid, xdim, ydim, sx, sy, step, maxvert):
+def traceStreamUV (ugrid, vgrid, xdim, ydim, dx, dy, sx, sy, step, maxvert):
 	"""
 	traceStreamUV: 2D streamline
 	
@@ -182,8 +182,8 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, sx, sy, step, maxvert):
 		vi = vi*imax;
 		
 		#update the current position
-		x = x+ui;
-		y = y+vi;
+		x = x+ui/dx;
+		y = y+vi/dy;
 	
 # 	print('numverts',numverts)
 	verts=verts[0:2*numverts]

@@ -90,7 +90,7 @@ tx,ty,tz = np.gradient(time)
 receiverx=101.0
 receivery=101.0
 receiverz=101.0
-paths,nrays=fmm.stream3d(-tx,-ty, -tz, receiverx, receivery, receiverz, step=0.1, maxvert=10000)
+paths,nrays=fmm.stream3d(-tx,-ty, -tz, dx, dy, dz, receiverx, receivery, receiverz, step=0.1, maxvert=10000)
 print('Before trim',paths.shape)
 ## trim the rays and add the source point
 paths=fmm.trimrays(paths,start_points=np.array([1,1,1]),T=0.5)
@@ -158,7 +158,7 @@ plt.plot((paths[1,:]-1)*dy,(paths[0,:]-1)*dx,(paths[2,:]-1)*dz,'g--',markersize=
 
 
 for ii in range(1,102,10):
-	paths,nrays=fmm.stream3d(-tx,-ty, -tz, 101, 101, ii, step=0.1, maxvert=10000)
+	paths,nrays=fmm.stream3d(-tx,-ty, -tz, dx, dy, dz, 101, 101, ii, step=0.1, maxvert=10000)
 	plt.plot((101-1)*dy,(101-1)*dx,(ii-1)*dz,'vb',markersize=10);
 	## plot rays
 	plt.plot((paths[1,:]-1)*dy,(paths[0,:]-1)*dx,(paths[2,:]-1)*dz,'g--',markersize=20);
@@ -264,7 +264,7 @@ tx,ty,tz = np.gradient(time)
 receiverx=101.0
 receivery=101.0
 receiverz=101.0
-paths,nrays=fmm.stream3d(-tx,-ty, -tz, receiverx, receivery, receiverz, step=0.1, maxvert=10000)
+paths,nrays=fmm.stream3d(-tx,-ty, -tz, dx, dy, dz, receiverx, receivery, receiverz, step=0.1, maxvert=10000)
 print('Before trim',paths.shape)
 ## trim the rays and add the source point
 paths=fmm.trimrays(paths,start_points=np.array([1,1,1]),T=0.5)
@@ -332,7 +332,7 @@ plt.gca().set_zlim(0,zmax);
 # 
 
 for ii in range(1,102,10):
-	paths,nrays=fmm.stream3d(-tx,-ty, -tz, 101, 51, ii, step=0.1, maxvert=10000)
+	paths,nrays=fmm.stream3d(-tx,-ty, -tz, dx, dy, dz, 101, 51, ii, step=0.1, maxvert=10000)
 	plt.plot((101-1)*dx,(51-1)*dy,(ii-1)*dz,'vb',markersize=10);
 	## plot rays
 	plt.plot((paths[0,:]-1)*dx,(paths[1,:]-1)*dy,(paths[2,:]-1)*dz,'g--',markersize=20);
