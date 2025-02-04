@@ -44,7 +44,7 @@ def stream2d(u,v, sx, sy, step=0.1, maxvert=10000):
 	
 	return verts,numverts
 
-def stream3d(u,v, w, sx, sy, sz, step=0.1, maxvert=10000):
+def stream3d(u,v, w, dx, dy, dz, sx, sy, sz, step=0.1, maxvert=10000):
 	"""
 	stream3d: draw 3D stream lines along the steepest descent direction
 	
@@ -85,7 +85,7 @@ def stream3d(u,v, w, sx, sy, sz, step=0.1, maxvert=10000):
 	xSize=u.shape[0]
 	ySize=u.shape[1]
 	zSize=u.shape[2]
-	[verts, numverts] = traceStreamUVW  (u.flatten(order='F'),v.flatten(order='F'),w.flatten(order='F'), xSize, ySize, zSize, sx, sy, sz, step, maxvert);
+	[verts, numverts] = traceStreamUVW  (u.flatten(order='F'),v.flatten(order='F'),w.flatten(order='F'), xSize, ySize, zSize, dx, dy, dz, sx, sy, sz, step, maxvert);
 	verts=verts.reshape(3,numverts,order='F');
 	
 	return verts,numverts
@@ -190,7 +190,7 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, sx, sy, step, maxvert):
 	
 	return verts,numverts
 
-def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, maxvert):
+def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, dy, dx, dz, sy, sx, sz, step, maxvert):
 	"""
 	traceStreamUVW: 3D streamline
 	
@@ -201,6 +201,9 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, ma
 	xdim:		number of samples in x
 	ydim:		number of samples in y
 	zdim:		number of samples in z
+	dx:			sampling in x
+	dy:			sampling in y
+	dz:			sampling in z
 	sx:			source relative coordinate in x [e.g., n.a, n is integer (grid NO) and a is floating number]
 	sy:			source relative coordinate in y  [e.g., n.a, n is integer (grid NO) and a is floating number]
 	sz:			source relative coordinate in z  [e.g., n.a, n is integer (grid NO) and a is floating number]
@@ -243,6 +246,14 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, ma
 			y=0;
 		if z<0:
 			z=0;
+			
+		if x>=xdim-1:
+			x=xdim-1;
+		if y>=ydim-1:
+			y=ydim-1;
+		if z>=zdim-1:
+			z=zdim-1;
+				
 		if (x<0 or x>xdim or y<0 or y>ydim or z<0 or z>zdim or numverts>=maxvert) :
 			print("First break");
 			break;
@@ -296,7 +307,7 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, ma
 			
 		if abs(wi)>imax:
 			imax=abs(wi);
-			
+
 		if imax==0:
 			print("Third break");
 			break;
@@ -307,9 +318,9 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, sy, sx, sz, step, ma
 		wi = wi*imax;
 		
 		#update the current position
-		x = x+ui;
-		y = y+vi;
-		z = z+wi;
+		x = x+ui/dx;
+		y = y+vi/dy;
+		z = z+wi/dz; ##very tricky solution for dx!=dy!=dz case
 
 	verts=verts[0:3*numverts] 
 	
@@ -361,30 +372,36 @@ def ray3d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],s
 	maxvert: maximum number of verts
 	
 	kws:	other key words (e.g., trim=0.5)
+	trim:  allowable distance between the source point and the second last ray point (in absolute grid spacing)
+	trim = 0.000000001 means no trimming; when trim=0, the number of ray points will increase by 1, adding the source.
 	
 	OUTPUT
 	paths: ray paths [x,y,z]
 	'''
 	
 	## Gradient calculation
-	tx,ty,tz = np.gradient(time)
+
 	dx=ax[1];dy=ay[1];dz=az[1];
+	print('dx,dy,dz',dx,dy,dz)
+	tx,ty,tz = np.gradient(time)
+
+	tx,ty,tz=tx/dx,ty/dy,tz/dz
 	
 	receiverx=(receiver[0]-ax[0])/ax[1]+1
 	receivery=(receiver[1]-ay[0])/ay[1]+1
 	receiverz=(receiver[2]-az[0])/az[1]+1
 	
-	paths,nrays=stream3d(-tx,-ty, -tz, receiverx, receivery, receiverz, step=step, maxvert=maxvert)
-	
+	paths,nrays=stream3d(-tx,-ty, -tz, dx, dy, dz, receiverx, receivery, receiverz, step=step, maxvert=maxvert)
+
+	print('Before trim',paths.shape)
 	if 'trim' in kws.keys():
 		sourcex=(source[0]-ax[0])/ax[1]+1
 		sourcey=(source[1]-ay[0])/ay[1]+1
 		sourcez=(source[2]-az[0])/az[1]+1
 		
-		print('Before trim',paths.shape)
 		## trim the rays and add the source point
-		paths=trimrays(paths,start_points=np.array([sourcex,sourcey,sourcez]),T=0.5)
-		print('After trim',paths.shape)
+		paths=trimrays(paths,start_points=np.array([sourcex,sourcey,sourcez]),T=kws['trim']) #e.g., 0.5
+	print('After trim',paths.shape)
 
 	paths[0,:]=(paths[0,:]-1)*dx;
 	paths[1,:]=(paths[1,:]-1)*dy;
