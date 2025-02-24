@@ -26,12 +26,12 @@ vel=np.multiply(v,h,dtype='float32'); #z,x
 
 t=fmm.eikonal(vel.transpose().flatten(order='F'),xyz=np.array([0,0,0]),ax=[0,dx,nx],ay=[0,0.01,1],az=[0,dz,nz],order=2);
 time=t.reshape(nx,nz,order='F');#first axis (vertical) is x, second is z
-time=time.transpose(); #z,x
+# time=time.transpose(); #z,x
 
 # tz=np.gradient(time,axis=1);
 # tx=np.gradient(time,axis=0);
 # # or
-tz,tx = np.gradient(time)
+tx,tz = np.gradient(time)
 
 
 # fig = plt.figure(figsize=(16, 8))
@@ -46,7 +46,7 @@ plt.jet()
 plt.colorbar(orientation='horizontal',shrink=0.6,label='Traveltime (s)');
 
 for ii in range(1,502,50):
-	paths,nrays=fmm.stream2d(-tx,-tz, 501, ii, step=0.1, maxvert=10000)
+	paths,nrays=fmm.stream2d(-tx,-tz, dx, dz, 501, ii, step=0.1, maxvert=10000)
 	plt.plot(500*dx,(ii-1)*dz,'vb',markersize=15);
 	## plot rays
 	plt.plot((paths[0,:]-1)*dx,(paths[1,:]-1)*dz,'g--',markersize=20);
@@ -200,12 +200,12 @@ vel=np.multiply(v,h,dtype='float32'); #z,x
 
 t=fmm.eikonal(vel.transpose().flatten(order='F'),xyz=np.array([0,0,0]),ax=[0,dx,nx],ay=[0,0.01,1],az=[0,dz,nz],order=2);
 time=t.reshape(nx,nz,order='F');#first axis (vertical) is x, second is z
-time=time.transpose(); #z,x
+# time=time.transpose(); #z,x
 
 # tz=np.gradient(time,axis=1);
 # tx=np.gradient(time,axis=0);
 # # or
-tz,tx = np.gradient(time)
+tx,tz = np.gradient(time)
 
 
 # fig = plt.figure(figsize=(16, 8))
@@ -220,7 +220,7 @@ plt.jet()
 plt.colorbar(orientation='horizontal',shrink=0.6,label='Traveltime (s)');
 
 for ii in range(1,502,50):
-	paths,nrays=fmm.stream2d(-tx,-tz, 301, ii, step=0.1, maxvert=10000)
+	paths,nrays=fmm.stream2d(-tx,-tz, dx, dz, 301, ii, step=0.1, maxvert=10000)
 	plt.plot(300*dx,(ii-1)*dz,'vb',markersize=15);
 	## plot rays
 	plt.plot((paths[0,:]-1)*dx,(paths[1,:]-1)*dz,'g--',markersize=20);

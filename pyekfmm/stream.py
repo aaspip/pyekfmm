@@ -36,8 +36,8 @@ def stream2d(u,v, dx, dy, sx, sy, step=0.1, maxvert=10000):
 	 demos/test_xxx.py
 	"""
 	
-	xSize=u.shape[1]
-	ySize=u.shape[0]
+	xSize=u.shape[0]
+	ySize=u.shape[1]
 	
 	[verts, numverts] = traceStreamUV  (u.flatten(order='F'),v.flatten(order='F'),xSize, ySize, dx, dy, sx, sy, step, maxvert);
 	verts=verts.reshape(2,numverts,order='F');
@@ -96,7 +96,7 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, dx, dy, sx, sy, step, maxvert):
 	
 	INPUT
 	ugrid:   	derivative of traveltime in x
-	vgrid:   	derivative of traveltime in z
+	vgrid:   	derivative of traveltime in y 
 	xdim:		number of samples in x
 	ydim:		number of samples in y
 	sx:			source relative coordinate in x [e.g., n.a, n is integer (grid NO) and a is floating number]
@@ -105,7 +105,7 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, dx, dy, sx, sy, step, maxvert):
 	maxvert: maximum number of verts
 	
 	OUTPUT  
-	verts: verts locations in [x,y,z]
+	verts: verts locations in [x,y]
 	numverts: number of verts
 	
 	Copyright (C) 2023 The University of Texas at Austin
@@ -131,7 +131,17 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, dx, dy, sx, sy, step, maxvert):
 	x=sx-1;y=sy-1;
 	verts=np.zeros([2*maxvert,1])
 	while 1:
-		if (x<0 or x>xdim-1 or y<0 or y>ydim-1 or numverts>=maxvert) : 
+		if x<0:
+			x=0;
+		if y<0:
+			y=0;
+			
+		if x>=xdim-1:
+			x=xdim-1;
+		if y>=ydim-1:
+			y=ydim-1;
+	
+		if (x<0 or x>xdim or y<0 or y>ydim or numverts>=maxvert) : 
 # 			print("First break");
 			break;
 		
@@ -164,8 +174,8 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, dx, dy, sx, sy, step, maxvert):
 				break;
 		
 		numverts=numverts+1;
-		ui = ugrid[iy  +ydim*ix]*a + ugrid[iy  +ydim*(ix+1)]*b + ugrid[iy+1+ydim*ix]*c + ugrid[iy+1+ydim*(ix+1)]*d;
-		vi = vgrid[iy  +ydim*ix]*a + vgrid[iy  +ydim*(ix+1)]*b + vgrid[iy+1+ydim*ix]*c + vgrid[iy+1+ydim*(ix+1)]*d;
+		ui = ugrid[ix  +xdim*iy]*a + ugrid[ix  +xdim*(iy+1)]*b + ugrid[ix+1+xdim*iy]*c + ugrid[ix+1+xdim*(iy+1)]*d;
+		vi = vgrid[ix  +xdim*iy]*a + vgrid[ix  +xdim*(iy+1)]*b + vgrid[ix+1+xdim*iy]*c + vgrid[ix+1+xdim*(iy+1)]*d;
 		
 		#calculate step size, if 0, done
 		if abs(ui) > abs(vi):
@@ -190,13 +200,13 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, dx, dy, sx, sy, step, maxvert):
 	
 	return verts,numverts
 
-def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, dy, dx, dz, sy, sx, sz, step, maxvert):
+def traceStreamUVW (ugrid, vgrid, wgrid, xdim, ydim,  zdim, dx, dy, dz, sx, sy, sz, step, maxvert):
 	"""
 	traceStreamUVW: 3D streamline
 	
 	INPUT
-	vgrid:   	derivative of traveltime in y
 	ugrid:   	derivative of traveltime in x
+	vgrid:   	derivative of traveltime in y
 	wgrid:   	derivative of traveltime in z
 	xdim:		number of samples in x
 	ydim:		number of samples in y
@@ -275,17 +285,26 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, dy, dx, dz, sy, sx, 
 		yfrac=y-iy;
 		zfrac=z-iz;
 		#weights for linear interpolation
+# 		a=(1-xfrac)*(1-yfrac)*(1-zfrac);
+# 		b=(  xfrac)*(1-yfrac)*(1-zfrac);
+# 		c=(1-xfrac)*(  yfrac)*(1-zfrac);
+# 		d=(  xfrac)*(  yfrac)*(1-zfrac);
+# 		e=(1-xfrac)*(1-yfrac)*(  zfrac);
+# 		f=(  xfrac)*(1-yfrac)*(  zfrac);
+# 		g=(1-xfrac)*(  yfrac)*(  zfrac);
+# 		h=(  xfrac)*(  yfrac)*(  zfrac);
+
 		a=(1-xfrac)*(1-yfrac)*(1-zfrac);
-		b=(  xfrac)*(1-yfrac)*(1-zfrac);
-		c=(1-xfrac)*(  yfrac)*(1-zfrac);
+		b=(1-xfrac)*(  yfrac)*(1-zfrac);
+		c=(  xfrac)*(1-yfrac)*(1-zfrac);
 		d=(  xfrac)*(  yfrac)*(1-zfrac);
 		e=(1-xfrac)*(1-yfrac)*(  zfrac);
-		f=(  xfrac)*(1-yfrac)*(  zfrac);
-		g=(1-xfrac)*(  yfrac)*(  zfrac);
+		f=(1-xfrac)*(  yfrac)*(  zfrac);
+		g=(  xfrac)*(1-yfrac)*(  zfrac);
 		h=(  xfrac)*(  yfrac)*(  zfrac);
-		
-		verts[3*numverts + 0] = y+1;
-		verts[3*numverts + 1] = x+1;
+	
+		verts[3*numverts + 0] = x+1;
+		verts[3*numverts + 1] = y+1;
 		verts[3*numverts + 2] = z+1;
 		#if already been here, done
 		if numverts>=2:
@@ -295,10 +314,41 @@ def traceStreamUVW (vgrid, ugrid, wgrid, ydim, xdim,  zdim, dy, dx, dz, sy, sx, 
 				break;
 		
 		numverts=numverts+1;
-		ui = ugrid[iy  +ydim*ix +xdim*ydim*iz]*a + ugrid[iy  +ydim*(ix+1) +xdim*ydim*iz]*b + ugrid[iy+1+ydim*ix+xdim*ydim*iz]*c + ugrid[iy+1+ydim*(ix+1)+xdim*ydim*iz]*d + ugrid[iy  +ydim*ix +xdim*ydim*(iz+1)]*e + ugrid[iy  +ydim*(ix+1) +xdim*ydim*(iz+1)]*f + ugrid[iy+1+ydim*ix+xdim*ydim*(iz+1)]*g + ugrid[iy+1+ydim*(ix+1)+xdim*ydim*(iz+1)]*h;
-		vi = vgrid[iy  +ydim*ix +xdim*ydim*iz]*a + vgrid[iy  +ydim*(ix+1) +xdim*ydim*iz]*b + vgrid[iy+1+ydim*ix+xdim*ydim*iz]*c + vgrid[iy+1+ydim*(ix+1)+xdim*ydim*iz]*d + vgrid[iy  +ydim*ix +xdim*ydim*(iz+1)]*e + vgrid[iy  +ydim*(ix+1) +xdim*ydim*(iz+1)]*f + vgrid[iy+1+ydim*ix+xdim*ydim*(iz+1)]*g + vgrid[iy+1+ydim*(ix+1)+xdim*ydim*(iz+1)]*h;
-		wi = wgrid[iy  +ydim*ix +xdim*ydim*iz]*a + wgrid[iy  +ydim*(ix+1) +xdim*ydim*iz]*b + wgrid[iy+1+ydim*ix+xdim*ydim*iz]*c + wgrid[iy+1+ydim*(ix+1)+xdim*ydim*iz]*d + wgrid[iy  +ydim*ix +xdim*ydim*(iz+1)]*e + wgrid[iy  +ydim*(ix+1) +xdim*ydim*(iz+1)]*f + wgrid[iy+1+ydim*ix+xdim*ydim*(iz+1)]*g + wgrid[iy+1+ydim*(ix+1)+xdim*ydim*(iz+1)]*h;
-	
+# 		ui = ugrid[iy  +ydim*ix +xdim*ydim*iz]*a + ugrid[iy  +ydim*(ix+1) +xdim*ydim*iz]*b + ugrid[iy+1+ydim*ix+xdim*ydim*iz]*c + ugrid[iy+1+ydim*(ix+1)+xdim*ydim*iz]*d + ugrid[iy  +ydim*ix +xdim*ydim*(iz+1)]*e + ugrid[iy  +ydim*(ix+1) +xdim*ydim*(iz+1)]*f + ugrid[iy+1+ydim*ix+xdim*ydim*(iz+1)]*g + ugrid[iy+1+ydim*(ix+1)+xdim*ydim*(iz+1)]*h;
+# 		vi = vgrid[iy  +ydim*ix +xdim*ydim*iz]*a + vgrid[iy  +ydim*(ix+1) +xdim*ydim*iz]*b + vgrid[iy+1+ydim*ix+xdim*ydim*iz]*c + vgrid[iy+1+ydim*(ix+1)+xdim*ydim*iz]*d + vgrid[iy  +ydim*ix +xdim*ydim*(iz+1)]*e + vgrid[iy  +ydim*(ix+1) +xdim*ydim*(iz+1)]*f + vgrid[iy+1+ydim*ix+xdim*ydim*(iz+1)]*g + vgrid[iy+1+ydim*(ix+1)+xdim*ydim*(iz+1)]*h;
+# 		wi = wgrid[iy  +ydim*ix +xdim*ydim*iz]*a + wgrid[iy  +ydim*(ix+1) +xdim*ydim*iz]*b + wgrid[iy+1+ydim*ix+xdim*ydim*iz]*c + wgrid[iy+1+ydim*(ix+1)+xdim*ydim*iz]*d + wgrid[iy  +ydim*ix +xdim*ydim*(iz+1)]*e + wgrid[iy  +ydim*(ix+1) +xdim*ydim*(iz+1)]*f + wgrid[iy+1+ydim*ix+xdim*ydim*(iz+1)]*g + wgrid[iy+1+ydim*(ix+1)+xdim*ydim*(iz+1)]*h;
+
+# 		ui = ugrid[ix  +xdim*iy +xdim*ydim*iz]*a + ugrid[ix  +xdim*(iy+1) +xdim*ydim*iz]*b + ugrid[ix+1+xdim*iy+xdim*ydim*iz]*c + ugrid[ix+1+xdim*(iy+1)+xdim*ydim*iz]*d + ugrid[ix  +xdim*iy +xdim*ydim*(iz+1)]*e + ugrid[ix  +xdim*(iy+1) +xdim*ydim*(iz+1)]*f + ugrid[ix+1+xdim*iy+xdim*ydim*(iz+1)]*g + ugrid[ix+1+xdim*(iy+1)+xdim*ydim*(iz+1)]*h;
+# 		vi = vgrid[ix  +xdim*iy +xdim*ydim*iz]*a + vgrid[ix  +xdim*(iy+1) +xdim*ydim*iz]*b + vgrid[ix+1+xdim*iy+xdim*ydim*iz]*c + vgrid[ix+1+xdim*(iy+1)+xdim*ydim*iz]*d + vgrid[ix  +xdim*iy +xdim*ydim*(iz+1)]*e + vgrid[ix  +xdim*(iy+1) +xdim*ydim*(iz+1)]*f + vgrid[ix+1+xdim*iy+xdim*ydim*(iz+1)]*g + vgrid[ix+1+xdim*(iy+1)+xdim*ydim*(iz+1)]*h;
+# 		wi = wgrid[ix  +xdim*iy +xdim*ydim*iz]*a + wgrid[ix  +xdim*(iy+1) +xdim*ydim*iz]*b + wgrid[ix+1+xdim*iy+xdim*ydim*iz]*c + wgrid[ix+1+xdim*(iy+1)+xdim*ydim*iz]*d + wgrid[ix  +xdim*iy +xdim*ydim*(iz+1)]*e + wgrid[ix  +xdim*(iy+1) +xdim*ydim*(iz+1)]*f + wgrid[ix+1+xdim*iy+xdim*ydim*(iz+1)]*g + wgrid[ix+1+xdim*(iy+1)+xdim*ydim*(iz+1)]*h;
+
+		ui = ugrid[ix  +xdim*iy    +xdim*ydim*iz]*a + \
+			 ugrid[ix  +xdim*(iy+1)+xdim*ydim*iz]*b + \
+			 ugrid[ix+1+xdim*iy    +xdim*ydim*iz]*c + \
+			 ugrid[ix+1+xdim*(iy+1)+xdim*ydim*iz]*d + \
+			 ugrid[ix  +xdim*iy    +xdim*ydim*(iz+1)]*e + \
+			 ugrid[ix  +xdim*(iy+1)+xdim*ydim*(iz+1)]*f + \
+			 ugrid[ix+1+xdim*iy    +xdim*ydim*(iz+1)]*g + \
+			 ugrid[ix+1+xdim*(iy+1)+xdim*ydim*(iz+1)]*h;
+
+		vi = vgrid[ix  +xdim*iy    +xdim*ydim*iz]*a + \
+			 vgrid[ix  +xdim*(iy+1)+xdim*ydim*iz]*b + \
+			 vgrid[ix+1+xdim*iy    +xdim*ydim*iz]*c + \
+			 vgrid[ix+1+xdim*(iy+1)+xdim*ydim*iz]*d + \
+			 vgrid[ix  +xdim*iy    +xdim*ydim*(iz+1)]*e + \
+			 vgrid[ix  +xdim*(iy+1)+xdim*ydim*(iz+1)]*f + \
+			 vgrid[ix+1+xdim*iy    +xdim*ydim*(iz+1)]*g + \
+			 vgrid[ix+1+xdim*(iy+1)+xdim*ydim*(iz+1)]*h;
+
+		wi = wgrid[ix  +xdim*iy    +xdim*ydim*iz]*a + \
+			 wgrid[ix  +xdim*(iy+1)+xdim*ydim*iz]*b + \
+			 wgrid[ix+1+xdim*iy    +xdim*ydim*iz]*c + \
+			 wgrid[ix+1+xdim*(iy+1)+xdim*ydim*iz]*d + \
+			 wgrid[ix  +xdim*iy    +xdim*ydim*(iz+1)]*e + \
+			 wgrid[ix  +xdim*(iy+1)+xdim*ydim*(iz+1)]*f + \
+			 wgrid[ix+1+xdim*iy    +xdim*ydim*(iz+1)]*g + \
+			 wgrid[ix+1+xdim*(iy+1)+xdim*ydim*(iz+1)]*h;
+			 
 		#calculate step size, if 0, done
 		if abs(ui) > abs(vi):
 			imax=abs(ui);
@@ -358,7 +408,59 @@ def trimrays(paths, start_points, T=None):
 	return paths
 	
 	
+def ray2d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],step=0.1,maxvert=10000,**kws):
+	'''
+	ray2d: 2D ray tracing
 	
+	INPUT
+	time: 2D traveltime
+	source: 	source location [sx,sy]
+	receiver: receiver location [rx,ry]
+	ax=[0,dx,nx],ay=[0,dy,ny]
+	step:ray segment increase
+	maxvert: maximum number of verts
+	
+	kws:	other key words (e.g., trim=0.5)
+	trim:  allowable distance between the source point and the second last ray point (in absolute grid spacing)
+	trim = 0.000000001 means no trimming; when trim=0, the number of ray points will increase by 1, adding the source.
+	
+	OUTPUT
+	paths: ray paths [x,y]
+	'''
+	
+	## Gradient calculation
+	dx=ax[1];dy=ay[1];
+	nx=ax[2];ny=ay[2];
+
+	if nx==1 and ny==1:
+		Exception("INPUT ERROR: the input time must have at least two dimensions")
+			
+	time=np.squeeze(time)
+		
+	print('dx,dy',dx,dy)
+	tx,ty = np.gradient(time)
+
+	tx,ty=tx/dx,ty/dy
+	
+	receiverx=(receiver[0]-ax[0])/ax[1]+1
+	receivery=(receiver[1]-ay[0])/ay[1]+1
+	
+	paths,nrays=stream2d(-tx,-ty, dx, dy, receiverx, receivery, step=step, maxvert=maxvert)
+
+	print('Before trim',paths.shape)
+	if 'trim' in kws.keys():
+		sourcex=(source[0]-ax[0])/ax[1]+1
+		sourcey=(source[1]-ay[0])/ay[1]+1
+		## trim the rays and add the source point
+		paths=trimrays(paths,start_points=np.array([sourcex,sourcey]),T=kws['trim']) #e.g., 0.5
+	print('After trim',paths.shape)
+		
+	paths[0,:]=(paths[0,:]-1)*dx;
+	paths[1,:]=(paths[1,:]-1)*dy;
+	
+	return paths	
+
+
 def ray3d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],step=0.1,maxvert=10000,**kws):
 	'''
 	ray3d: 3D ray tracing
@@ -379,10 +481,15 @@ def ray3d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],s
 	paths: ray paths [x,y,z]
 	'''
 	
+	print('receiver',receiver)
+	print('source',source)
+	
 	## Gradient calculation
-
 	dx=ax[1];dy=ay[1];dz=az[1];
+	nx=ax[2];ny=ay[2];nz=az[2];
 	print('dx,dy,dz',dx,dy,dz)
+	print('nx,ny,nz',nx,ny,nz)
+	
 	tx,ty,tz = np.gradient(time)
 
 	tx,ty,tz=tx/dx,ty/dy,tz/dz

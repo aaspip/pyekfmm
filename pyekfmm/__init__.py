@@ -26,6 +26,7 @@ from eikonalvtic import *
 from .stream import stream2d
 from .stream import stream3d
 from .stream import trimrays
+from .stream import ray2d
 from .stream import ray3d
 from .stream import extract
 from .stream import extracts
