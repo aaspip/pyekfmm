@@ -582,9 +582,6 @@ def extract(time, point, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
 	pointx=(point[0]-ax[0])/ax[1]
 	pointy=(point[1]-ay[0])/ay[1]
 	pointz=(point[2]-az[0])/az[1]
-
-# 	print('point',point)
-# 	print('pointx',pointx)
 	
 	ix=int(np.floor(pointx))
 	iy=int(np.floor(pointy))
@@ -613,9 +610,6 @@ def extract(time, point, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
 	g=(  xfrac)*(1-yfrac)*(  zfrac);
 	h=(  xfrac)*(  yfrac)*(  zfrac);
 
-# 	print('xfrac,yfrac,zfrac',xfrac,yfrac,zfrac)
-# 	print('a,b,c,d,e,f,g,h',a,b,c,d,e,f,g,h)
-# 	print('ix,iy,iz',ix,iy,iz)
 	tpoint = time[ix  +xdim*iy 	  +xdim*ydim*iz]*a + \
 			 time[ix  +xdim*(iy+1)+xdim*ydim*iz]*b + \
 			 time[ix+1+xdim*iy    +xdim*ydim*iz]*c + \
