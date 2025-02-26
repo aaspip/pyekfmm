@@ -44,9 +44,13 @@ def formL2d(paths, ax=[0,0.01,101],ay=[0,0.01,101]):
 		ilonlatB=[grid_struct['LONS'].flatten(order='F')[iB],grid_struct['LATS'].flatten(order='F')[iB]];
 		ilonlatC=[grid_struct['LONS'].flatten(order='F')[iC],grid_struct['LATS'].flatten(order='F')[iC]];
 		
-		xyzA=np.concatenate([ilonlatA[0],ilonlatA[1],np.zeros(len(iA))[:,np.newaxis]],axis=1)
-		xyzB=np.concatenate([ilonlatB[0],ilonlatB[1],np.zeros(len(iB))[:,np.newaxis]],axis=1)
-		xyzC=np.concatenate([ilonlatC[0],ilonlatC[1],np.zeros(len(iC))[:,np.newaxis]],axis=1)
+# 		xyzA=np.concatenate([ilonlatA[0],ilonlatA[1],np.zeros(len(iA))[:,np.newaxis]],axis=1)
+# 		xyzB=np.concatenate([ilonlatB[0],ilonlatB[1],np.zeros(len(iB))[:,np.newaxis]],axis=1)
+# 		xyzC=np.concatenate([ilonlatC[0],ilonlatC[1],np.zeros(len(iC))[:,np.newaxis]],axis=1)
+		xyzA=np.concatenate([ilonlatA[1],ilonlatA[0],np.zeros(len(iA))[:,np.newaxis]],axis=1)
+		xyzB=np.concatenate([ilonlatB[1],ilonlatB[0],np.zeros(len(iB))[:,np.newaxis]],axis=1)
+		xyzC=np.concatenate([ilonlatC[1],ilonlatC[0],np.zeros(len(iC))[:,np.newaxis]],axis=1)
+
 # 		print(lons_M.shape,lats_M.shape,np.zeros(lats_M.shape[0])[:,np.newaxis].shape)
 		xyzM=np.concatenate([lons_M[:,np.newaxis],lats_M[:,np.newaxis],np.zeros(lats_M.shape[0])[:,np.newaxis]],axis=1)
 		
@@ -55,10 +59,16 @@ def formL2d(paths, ax=[0,0.01,101],ay=[0,0.01,101]):
 # 		xyzC=geo2cartesian(ilonlatC(:,1),ilonlatC(:,2));
 		
 		xyzMp = projection(xyzM, xyzA, xyzB, xyzC);
-	
+		print('xyzM',xyzM)
+		print('xyzMp',xyzMp)
+		print(' xyzA', xyzA)
+		print(' xyzB', xyzB)
+		print(' xyzC', xyzC)
+		
 		[wA, wB, wC] = barycentric_coords(xyzMp, xyzA, xyzB, xyzC);
-	
-		#[wA, wB, wC]
+		print('[wA wB wC]',[wA, wB, wC])
+		
+# 		print('[wA, wB, wC]',[wA, wB, wC])
 		#attributing weights to grid nodes along path:
 		#w[j, :] = w_j(r) = weights of node j along path
 		nM = path.shape[0];
@@ -70,6 +80,7 @@ def formL2d(paths, ax=[0,0.01,101],ay=[0,0.01,101]):
 	
 		ds =  np.sqrt((lats_M[0:-2]-lats_M[1:-1])*(lats_M[0:-2]-lats_M[1:-1])+(lons_M[0:-2]-lons_M[1:-1])*(lons_M[0:-2]-lons_M[1:-1]));
 		print('ds.shape',ds.shape)
+		print('ds',ds)
 		print('nM',nM)
 		print('(w[:,0:-2] + w[:,2:-1]).shape',(w[:,0:-2] + w[:,1:-1]).shape)
 		print('np.multiply((w[:,0:-2] + w[:,1:-1]), ds[:,np.newaxis]).shape',np.matmul((w[:,0:-2] + w[:,1:-1]), ds[:,np.newaxis]).shape)
@@ -99,7 +110,7 @@ def projection(xyzM, xyzA, xyzB, xyzC):
 	MMp=np.zeros(u.shape);
 	
 	for n in range(norm_u.shape[0]):
-		u[n,:] = u[n,:] / norm_u[n];
+		u[n,:] = u[n,:] / (norm_u[n]+0.000000001);
 		MA_dot_u=np.sum(MA[n,:]*u[n,:]);
 		MMp[n,:]=MA_dot_u*u[n,:];
 	
@@ -133,10 +144,19 @@ def barycentric_coords(xyzMp, xyzA, xyzB, xyzC):
 	wC = np.sqrt(np.sum(np.cross(MA, MB)*np.cross(MA, MB),axis=1)) / 2.0;
 	wtot = wA + wB + wC;
 
-	wA=wA / wtot;
-	wB=wB / wtot;
-	wC=wC / wtot;
+	wA=wA / (wtot+0.00000001);
+	wB=wB / (wtot+0.00000001);
+	wC=wC / (wtot+0.00000001);
 
+# 	if wA == wB and wB==wC:
+# 		wA=1/3.0;
+# 		wB=1/3.0;
+# 		wC=1/3.0;
+
+	wA[wA ==0 ]=1
+	wB[wB ==0 ]=1
+	wC[wC ==0 ]=1
+	
 	return wA, wB, wC
 
 
@@ -183,15 +203,45 @@ def indexes_delaunay_triangle(grid_struct, x, y):
 	index2 = np.zeros([len(xratio),1],dtype='int')
 	index3 = np.zeros([len(xratio),1],dtype='int')
 	
-	index1[:,0] = iy*nx+ix;
+	for n in range(len(xratio)):
+		if xratio[n]==0 and yratio[n]==0:
+			index1[n,0] = (iy[n]+1)*nx+ix[n]+1;
+		elif xratio[n]==0 and yratio[n]!=0:
+			index1[n,0] = (iy[n])*nx+ix[n]+1;
+		elif xratio[n]!=0 and yratio[n]==0:
+			index1[n,0] = (iy[n]+1)*nx+ix[n];
+		else:
+			index1[n,0] = (iy[n])*nx+ix[n];
+	
 	for n in range(len(xratio)):
 		if xratio[n]>=yratio[n]:
-			index2[n,0]=(iy[n])*ny+ix[n]+1;
+			if yratio[n]!=0:
+				index2[n,0]=(iy[n])*ny+ix[n]+1;
+			else:
+				index2[n,0]=(iy[n]+1)*ny+ix[n]+1;
 		else:
-			index2[n,0]=(iy[n]+1)*ny+ix[n];
+			if xratio[n]!=0:
+				index2[n,0]=(iy[n]+1)*ny+ix[n];
+			else:
+				index2[n,0]=(iy[n]+1)*ny+ix[n]+1;
+
+# 	for n in range(len(xratio)):
+# 		if xratio[n]==0
+# 			index2[n,0]=(iy+1)*nx+ix+1;
+# 		if yratio[n]==0
+# 			index2[n,0]=(iy+1)*nx+ix+1;
+# 			
+# 			
+# 			
+# 		if xratio[n]>=yratio[n]:
+# 			index2[n,0]=(iy[n])*ny+ix[n]+1;
+# 		else:
+# 			index2[n,0]=(iy[n]+1)*ny+ix[n];
 
 # 	index2[:,0] = index2[:,0];
 	index3[:,0] = (iy+1)*nx+ix+1;
+	
+	
 	
 	return index1,index2,index3
 	
