@@ -17,7 +17,7 @@ eikonalvtic_module = Extension('eikonalvtic', sources=['pyekfmm/src/eikonalvti.c
 setup(
     name="pyekfmm",
     version="0.0.8.8",
-    license='GNU General Public License, Version 3 (GPLv3)',
+    license='MIT License',
     description="Fast Marching Method for Traveltime Calculation",
     long_description=long_description,
     author="pyekfmm developing team",
@@ -38,8 +38,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering",
-        "Topic :: Scientific/Engineering :: Physics",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+        "Topic :: Scientific/Engineering :: Physics"
     ],
     keywords=[
         "seismology", "exploration seismology", "array seismology", "traveltime", "ray tracing", "earthquake location", "earthquake relocation", "surface wave tomography", "body wave tomography"
