@@ -117,67 +117,69 @@ plt.show()
 #skfmm: MAE=0.00540868
 
 
-
+##########################################################################################
+### Below is comparison with pykonal
 #If you have pykonal installed, uncomment below
-import pykonal
-nx=201;nz=201;
-xs=5;zs=5;dx=0.05;dz=0.05;ox=0;oz=0;
-phi = np.ones((nx, nz))
-
-solver = pykonal.EikonalSolver(coord_sys="cartesian")
-solver.velocity.min_coords = oz, ox, oz
-solver.velocity.node_intervals = dz, dx, dz
-solver.velocity.npts = nz, nx, 1
-solver.velocity.values = velz.reshape(201,201,1,order='F') #pykonal requires vel in ZXY
-
-src_idx = 100, 100, 0
-
-solver.traveltime.values[src_idx] = 0
-solver.unknown[src_idx] = False
-solver.trial.push(*src_idx)
-solver.solve()
-
-time_pykonal = solver.traveltime.values[:,:,0] 					#time is in ZXY
-
-import matplotlib.pyplot as plt
-fig = plt.figure(figsize=(12, 12))
-ax = fig.add_subplot(221,aspect=1.0)
-plt.imshow(time0.transpose(),clim=(0, 2),extent=[0,10,10,0])
-plt.plot(5,5,'*r',markersize=10)
-plt.xlabel('X (km)');plt.ylabel('Z (km)');
-plt.jet()
-plt.gca().invert_yaxis()
-plt.gca().text(-0.15,1,'a)',transform=plt.gca().transAxes,size=20,weight='normal')
-plt.title('Traveltime (Pyekfmm)');
-
-ax = fig.add_subplot(222,aspect=1.0)
-plt.imshow(time_pykonal,clim=(0, 2),extent=[0,10,10,0])
-plt.plot(5,5,'*r',markersize=10)
-plt.xlabel('X (km)');plt.ylabel('Z (km)');
-plt.jet()
-plt.gca().invert_yaxis()
-plt.gca().text(-0.15,1,'b)',transform=plt.gca().transAxes,size=20,weight='normal')
-plt.title('Traveltime (pykonal)');
-
-ax = fig.add_subplot(223,aspect=1.0)
-plt.imshow(np.abs(time_true.transpose()-time0.transpose())*100,clim=(0, 2),extent=[0,10,10,0])
-plt.plot(5,5,'*r',markersize=10)
-plt.xlabel('X (km)');plt.ylabel('Z (km)');
-plt.jet()
-plt.gca().invert_yaxis()
-plt.gca().text(-0.15,1,'c)',transform=plt.gca().transAxes,size=20,weight='normal')
-plt.title('Error*100 (Pyekfmm, MAE=%g)'%np.abs(time_true.transpose()-time0.transpose()).mean());
-
-ax = fig.add_subplot(224,aspect=1.0)
-plt.imshow(np.abs(time_true.transpose()-time_pykonal)*100,clim=(0, 2),extent=[0,10,10,0])
-
-plt.plot(5,5,'*r',markersize=10)
-plt.xlabel('X (km)');plt.ylabel('Z (km)');
-plt.jet()
-plt.gca().invert_yaxis()
-plt.gca().text(-0.15,1,'d)',transform=plt.gca().transAxes,size=20,weight='normal')
-plt.title('Error*100 (pykonal, MAE=%g)'%np.abs(time_true.transpose()-time_pykonal.transpose()).mean());
-
-plt.colorbar(orientation='horizontal',cax=fig.add_axes([0.37,0.07,0.3,0.02]),shrink=1,label='Traveltime (s)');
-plt.savefig('test_pyekfmm_fig1-comp2.png',format='png',dpi=300,bbox_inches='tight', pad_inches=0)
-plt.show()
+##########################################################################################
+# import pykonal
+# nx=201;nz=201;
+# xs=5;zs=5;dx=0.05;dz=0.05;ox=0;oz=0;
+# phi = np.ones((nx, nz))
+# 
+# solver = pykonal.EikonalSolver(coord_sys="cartesian")
+# solver.velocity.min_coords = oz, ox, oz
+# solver.velocity.node_intervals = dz, dx, dz
+# solver.velocity.npts = nz, nx, 1
+# solver.velocity.values = velz.reshape(201,201,1,order='F') #pykonal requires vel in ZXY
+# 
+# src_idx = 100, 100, 0
+# 
+# solver.traveltime.values[src_idx] = 0
+# solver.unknown[src_idx] = False
+# solver.trial.push(*src_idx)
+# solver.solve()
+# 
+# time_pykonal = solver.traveltime.values[:,:,0] 					#time is in ZXY
+# 
+# import matplotlib.pyplot as plt
+# fig = plt.figure(figsize=(12, 12))
+# ax = fig.add_subplot(221,aspect=1.0)
+# plt.imshow(time0.transpose(),clim=(0, 2),extent=[0,10,10,0])
+# plt.plot(5,5,'*r',markersize=10)
+# plt.xlabel('X (km)');plt.ylabel('Z (km)');
+# plt.jet()
+# plt.gca().invert_yaxis()
+# plt.gca().text(-0.15,1,'a)',transform=plt.gca().transAxes,size=20,weight='normal')
+# plt.title('Traveltime (Pyekfmm)');
+# 
+# ax = fig.add_subplot(222,aspect=1.0)
+# plt.imshow(time_pykonal,clim=(0, 2),extent=[0,10,10,0])
+# plt.plot(5,5,'*r',markersize=10)
+# plt.xlabel('X (km)');plt.ylabel('Z (km)');
+# plt.jet()
+# plt.gca().invert_yaxis()
+# plt.gca().text(-0.15,1,'b)',transform=plt.gca().transAxes,size=20,weight='normal')
+# plt.title('Traveltime (pykonal)');
+# 
+# ax = fig.add_subplot(223,aspect=1.0)
+# plt.imshow(np.abs(time_true.transpose()-time0.transpose())*100,clim=(0, 2),extent=[0,10,10,0])
+# plt.plot(5,5,'*r',markersize=10)
+# plt.xlabel('X (km)');plt.ylabel('Z (km)');
+# plt.jet()
+# plt.gca().invert_yaxis()
+# plt.gca().text(-0.15,1,'c)',transform=plt.gca().transAxes,size=20,weight='normal')
+# plt.title('Error*100 (Pyekfmm, MAE=%g)'%np.abs(time_true.transpose()-time0.transpose()).mean());
+# 
+# ax = fig.add_subplot(224,aspect=1.0)
+# plt.imshow(np.abs(time_true.transpose()-time_pykonal)*100,clim=(0, 2),extent=[0,10,10,0])
+# 
+# plt.plot(5,5,'*r',markersize=10)
+# plt.xlabel('X (km)');plt.ylabel('Z (km)');
+# plt.jet()
+# plt.gca().invert_yaxis()
+# plt.gca().text(-0.15,1,'d)',transform=plt.gca().transAxes,size=20,weight='normal')
+# plt.title('Error*100 (pykonal, MAE=%g)'%np.abs(time_true.transpose()-time_pykonal.transpose()).mean());
+# 
+# plt.colorbar(orientation='horizontal',cax=fig.add_axes([0.37,0.07,0.3,0.02]),shrink=1,label='Traveltime (s)');
+# plt.savefig('test_pyekfmm_fig1-comp2.png',format='png',dpi=300,bbox_inches='tight', pad_inches=0)
+# plt.show()
