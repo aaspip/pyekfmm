@@ -4,8 +4,7 @@
 :copyright:
     Yangkang Chen (chenyk2016@gmail.com), 2022-Present 
 :license:
-    GNU General Public License, Version 3
-    (http://www.gnu.org/copyleft/gpl.html)
+    MIT License
 """
 
 __version__ = "0.0.9"

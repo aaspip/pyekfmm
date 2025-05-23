@@ -19,16 +19,6 @@ def stream2d(u,v, dx, dy, sx, sy, step=0.1, maxvert=10000):
 	Copyright (C) 2023 The University of Texas at Austin
 	Copyright (C) 2023 Yangkang Chen
 	
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published
-	by the Free Software Foundation, either version 3 of the License, or
-	any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details: http://www.gnu.org/licenses/
-	
 	References   
 	[1] Chen et al., 2023, Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology, SRL.
 		
@@ -65,16 +55,6 @@ def stream3d(u,v, w, dx, dy, dz, sx, sy, sz, step=0.1, maxvert=10000):
 	Copyright (C) 2023 The University of Texas at Austin
 	Copyright (C) 2023 Yangkang Chen
 	
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published
-	by the Free Software Foundation, either version 3 of the License, or
-	any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details: http://www.gnu.org/licenses/
-	
 	References   
 	[1] Chen et al., 2023, Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology, SRL.
 		
@@ -110,16 +90,6 @@ def traceStreamUV (ugrid, vgrid, xdim, ydim, dx, dy, sx, sy, step, maxvert):
 	
 	Copyright (C) 2023 The University of Texas at Austin
 	Copyright (C) 2023 Yangkang Chen
-	
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published
-	by the Free Software Foundation, either version 3 of the License, or
-	any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details: http://www.gnu.org/licenses/
 	
 	References   
 	[1] Chen et al., 2023, Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology, SRL.
@@ -226,16 +196,6 @@ def traceStreamUVW (ugrid, vgrid, wgrid, xdim, ydim,  zdim, dx, dy, dz, sx, sy, 
 	
 	Copyright (C) 2023 The University of Texas at Austin
 	Copyright (C) 2023 Yangkang Chen
-	
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published
-	by the Free Software Foundation, either version 3 of the License, or
-	any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details: http://www.gnu.org/licenses/
 	
 	References   
 	[1] Chen et al., 2023, Pyekfmm: a python package for 3D fast-marching-based traveltime calculation and its applications in seismology, SRL.
