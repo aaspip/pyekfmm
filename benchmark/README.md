@@ -1,4 +1,4 @@
-#This is a benchmark repository for comparing Pyekfmm with other mainstream traveltime packages. 
+## This is a benchmark repository for comparing Pyekfmm with other mainstream traveltime packages. 
 
 Benchmark 1
 The following figure shows an example of reproducing Figure 3 in the Pykonal paper
