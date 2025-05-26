@@ -16,7 +16,7 @@ xm=0+dx*(nx-1);zm=0+dz*(nz-1);
 #https://github.com/aaspip/data/blob/main/marmeta.bin
 
 #  VZ
-fd = open('./marmvz.bin','rb')
+fd = open('../data/marmousiVTI/marmvz.bin','rb')
 vz = np.fromfile(fd, dtype = np.float32).reshape([nz,nx],order='F')    #[zxy]
 plt.imshow(vz,extent=[0,(nx-1)*dx,(nz-1)*dz,0]);
 plt.xlabel('X (m)');plt.ylabel('Z (m)');
@@ -25,7 +25,7 @@ plt.colorbar(orientation='horizontal',label="Velocity (m/s)");
 plt.show()
 
 # VX
-fd = open('./marmvx.bin','rb')
+fd = open('../data/marmousiVTI/marmvx.bin','rb')
 vx = np.fromfile(fd, dtype = np.float32).reshape([nz,nx],order='F')    #[zxy]
 plt.imshow(vx,extent=[0,(nx-1)*dx,(nz-1)*dz,0]);
 plt.xlabel('X (m)');plt.ylabel('Z (m)');
@@ -34,7 +34,7 @@ plt.colorbar(orientation='horizontal',label="Velocity (m/s)");
 plt.show()
 
 # eta
-fd = open('./marmeta.bin','rb')
+fd = open('../data/marmousiVTI/marmeta.bin','rb')
 et = np.fromfile(fd, dtype = np.float32).reshape([nz,nx],order='F')    #[zxy]
 plt.imshow(et,extent=[0,(nx-1)*dx,(nz-1)*dz,0]);
 plt.xlabel('X (m)');plt.ylabel('Z (m)');
