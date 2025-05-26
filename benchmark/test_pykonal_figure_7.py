@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pkg_resources
-import pykonal
-
+# import pykonal
+import scipy
 
 # In[2]:
 
@@ -19,27 +19,31 @@ fname = pkg_resources.resource_filename(
 )
 
 with np.load(fname) as npz:
-    vv = pykonal.fields.ScalarField3D(coord_sys='spherical')
-    dv = pykonal.fields.ScalarField3D(coord_sys='spherical')
-    vv.min_coords = dv.min_coords = npz['min_coords_2d'] + [0, 0, np.pi/4]
-    vv.node_intervals = dv.node_intervals = npz['node_intervals_2d']
+#     vv = pykonal.fields.ScalarField3D(coord_sys='spherical')
+#     dv = pykonal.fields.ScalarField3D(coord_sys='spherical')
+#     vv.min_coords = dv.min_coords = npz['min_coords_2d'] + [0, 0, np.pi/4]
+#     vv.node_intervals = dv.node_intervals = npz['node_intervals_2d']
     
     vv0=npz['vv_2d'][:,:,128:256]
+    dv0=npz['dv_2d'][:,:,128:256]
+
     node_intervals0=npz['node_intervals_2d'] #array([4.51793651e+01, 1.00000000e+00, 1.22719530e-02])
     min_coords = npz['min_coords_2d'] + [0, 0, np.pi/4] #array([3.50210000e+03, 1.57079633e+00, 7.91506816e-01])
+    npts = np.array([npz['npts_2d'][0], npz['npts_2d'][1], npz['npts_2d'][2]//4])
     
-    vv.npts = dv.npts = npz['npts_2d'][0], npz['npts_2d'][1], npz['npts_2d'][2]//4
-    vv.values = npz['vv_2d'][:,:,128:256]
-    dv.values = npz["dv_2d"][:,:,128:256]
+#     vv.npts = dv.npts = npz['npts_2d'][0], npz['npts_2d'][1], npz['npts_2d'][2]//4
+#     vv.values = npz['vv_2d'][:,:,128:256]
+#     dv.values = npz["dv_2d"][:,:,128:256]
 
 # vv0=vv.values;
+max_coords=min_coords+node_intervals0*(npts-1)
 
 plt.imshow(vv0[:,0,:]);plt.colorbar();
 plt.show()
 
 # Resample the velocity model (64, 1, 128) --> (1024, 1, 2048)
-rho_min, theta_min, phi_min = vv.min_coords
-rho_max, theta_max, phi_max = vv.max_coords
+rho_min, theta_min, phi_min = min_coords
+rho_max, theta_max, phi_max = max_coords
 nrho, ntheta, nphi = 1024, 1, 2048
 
 drho = (rho_max - rho_min) / (nrho - 1)
@@ -57,20 +61,25 @@ rtp = np.moveaxis(
     0, 
     -1
 )
-vv_new = vv.resample(rtp.reshape(-1, 3)).reshape(rtp.shape[:-1])
-dv_new = dv.resample(rtp.reshape(-1, 3)).reshape(rtp.shape[:-1])
+# vv_new = vv.resample(rtp.reshape(-1, 3)).reshape(rtp.shape[:-1])
+# dv_new = dv.resample(rtp.reshape(-1, 3)).reshape(rtp.shape[:-1])
 
-vv = pykonal.fields.ScalarField3D(coord_sys="spherical")
-dv = pykonal.fields.ScalarField3D(coord_sys="spherical")
-vv.min_coords = dv.min_coords = rho_min, theta_min, phi_min
-vv.node_intervals = dv.node_intervals = drho, dtheta, dphi
+# vv = pykonal.fields.ScalarField3D(coord_sys="spherical")
+# dv = pykonal.fields.ScalarField3D(coord_sys="spherical")
+min_coords = rho_min, theta_min, phi_min
+node_intervals = drho, dtheta, dphi
 
 node_intervals0 = np.array([drho, dtheta, dphi])
-vv.npts = dv.npts = nrho, ntheta, nphi
-vv.values = vv_new
-dv.values = dv_new
+# vv.npts = dv.npts = nrho, ntheta, nphi
+npts = nrho, ntheta, nphi
+# vv.values = vv_new
+# dv.values = dv_new
 
-velocity = vv
+vv_new=scipy.ndimage.zoom(vv0[:,0,:], 16, order=3)[:,np.newaxis,:]
+dv_new=scipy.ndimage.zoom(dv0[:,0,:], 16, order=3)[:,np.newaxis,:]
+
+
+# velocity = vv
 
 
 # In[3]:
@@ -129,7 +138,7 @@ SRC_IDX = np.array([512, 0, 1024])
 traveltime_fields = dict()
 for decimation_factor in range(7, -1, -1):
     decimation_factor = 2**decimation_factor
-    vv = velocity.values[::decimation_factor, :, ::decimation_factor]
+    vv = vv_new[::decimation_factor, :, ::decimation_factor]
 #     vv = vv0[::decimation_factor, :, ::decimation_factor] #r,t,p
 
 #     solver = pykonal.EikonalSolver(coord_sys="spherical")
@@ -198,13 +207,13 @@ for ax in (ax10, ax11, ax20, ax21, ax30, ax31, ax40, ax41, ax50):
     ax.text(-0.05, 1.1, f"({chr(panel)})", ha="right", va="top", transform=ax.transAxes)
     panel += 1
 
-nodes = dv.nodes
-xx = nodes[...,0] * np.sin(nodes[...,1]) * np.cos(nodes[...,2])
-yy = nodes[...,0] * np.sin(nodes[...,1]) * np.sin(nodes[...,2])
+# nodes = dv.nodes
+xx = rr_s * np.sin(90/180*np.pi) * np.cos(pp_s/180*np.pi)
+yy = rr_s * np.sin(90/180*np.pi) * np.sin(pp_s/180*np.pi)
 qmesh = ax10.pcolormesh(
-    xx[:,0],
-    yy[:,0],
-    dv.values[:,0],
+    xx,
+    yy,
+    dv_new[:,0],
     cmap=plt.get_cmap("seismic_r"),
     vmin=-1.25,
     vmax=1.25,
