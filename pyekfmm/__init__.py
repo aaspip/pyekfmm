@@ -12,6 +12,7 @@ __version__ = "0.0.9"
 from .fmm import eikonal
 from .fmm import eikonal_surf
 from .fmm import eikonal_rtp
+from .fmm import eikonal_plane
 
 from .fmmvti import eikonalvti
 from .fmmvti import eikonalvti_surf

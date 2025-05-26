@@ -278,7 +278,8 @@ for ax in (axins1, axins2, axins3, ax0):
 fig.legend(loc="center right")
 fig.tight_layout()
 
-
+plt.savefig('pykonal_figure_6.png')
+plt.show()
 # In[ ]:
 
 

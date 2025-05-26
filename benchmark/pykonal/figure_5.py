@@ -161,7 +161,8 @@ for ax in (ax10, ax11, ax20, ax21, ax30, ax31, ax40, ax41, ax50):
     ax.set_ylim(0, 5.12)
     ax.invert_yaxis()
 
-
+plt.savefig('pykonal_figure_5.png')
+plt.show()
 # In[ ]:
 
 

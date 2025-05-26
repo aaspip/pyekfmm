@@ -104,7 +104,8 @@ for solver, ax, panel in (
 cbar = fig.colorbar(qmesh, ax=(ax1, ax2))
 cbar.set_label("Velocity [km/s]")
 
-
+plt.savefig('pykonal_figure_8.png')
+plt.show()
 # In[ ]:
 
 

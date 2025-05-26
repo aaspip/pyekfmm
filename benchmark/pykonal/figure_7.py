@@ -206,7 +206,8 @@ for ax in (ax10, ax11, ax20, ax21, ax30, ax31, ax40, ax41, ax50):
     ax.set_xlim(-4500, 4500)
     ax.set_ylim(2500, 6500)
 
-
+plt.savefig('pykonal_figure_7.png')
+plt.show()
 # In[ ]:
 
 

@@ -1816,6 +1816,134 @@ static PyObject *eikonalc_surf(PyObject *self, PyObject *args){
 	
 }
 
+static PyObject *eikonalc_planesource(PyObject *self, PyObject *args){
+
+    /*Below is the input part*/
+    float f1,f2,f3,f4,f5,f6,f7,f8,f9;
+    int f10,f11,f12,f13,planedir; /*planedir means the plane/line source direction*/
+    
+	/**initialize data input**/
+    PyObject *arg1=NULL;
+    PyObject *arr1=NULL;
+
+	PyArg_ParseTuple(args, "Offfffffffiiiii", &arg1, &f1, &f2, &f3, &f4, &f5, &f6, &f7, &f8, &f9, &f10, &f11, &f12, &f13, &planedir);
+
+    int b1, b2, b3, n1, n2, n3, nshot, ndim, i, is, order, n123, *p;
+    float br1, br2, br3, o1, o2, o3, d1, d2, d3;
+    float **s, *t, *v;
+    float x, y, z;
+    bool plane[3];
+    
+	x=f1;
+	y=f2;
+	z=f3;
+	
+	o1=f4;
+	o2=f5;
+	o3=f6;
+	
+	d1=f7;
+	d2=f8;
+	d3=f9;
+	
+	n1=f10;
+	n2=f11;
+	n3=f12;
+	
+	order=f13;
+	
+	
+    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_IN_ARRAY);
+    /*
+     * my code starts here
+     */
+    npy_intp *sp=PyArray_SHAPE(arr1);
+
+	br1=d1;
+	br2=d2;
+	br3=d3;
+	plane[2]=false; /*Z direction is plane/line source*/
+	plane[1]=false; /*Y direction is plane/line source*/
+	plane[0]=false; /*X direction is plane/line source, e.g., sources span X0-Xn*/
+	
+	if (planedir==0) plane[0]=true;
+
+	if (planedir==1) plane[1]=true;
+		
+	if (planedir==2) plane[2]=true;
+		
+	b1= plane[2]? n1: (int) (br1/d1+0.5); 
+	b2= plane[1]? n2: (int) (br2/d2+0.5);
+	b3= plane[0]? n3: (int) (br3/d3+0.5); 
+
+    if( b1<1 ) b1=1;  
+    if( b2<1 ) b2=1;  
+    if( b3<1 ) b3=1;
+
+    /* File with shot locations (n2=number of shots, n1=3) */
+
+	nshot = 1;
+	ndim = 3;
+     
+    s = (float**)malloc(nshot * sizeof(float*));
+    for (i = 0; i < nshot; i++)
+        s[i] = (float*)malloc(ndim * sizeof(float));
+
+	s[0][0]=x;
+	s[0][1]=y;
+	s[0][2]=z;
+	
+    n123 = n1*n2*n3;
+
+	t = (float*)malloc(n123 * sizeof(float));
+	v = (float*)malloc(n123 * sizeof(float));
+	p = (int*)malloc(n123 * sizeof(int));
+	
+
+    if (*sp != n123)
+    {
+    	printf("Dimension mismatch, N_input = %d, N_model = %d \n", *sp, n123);
+    	return NULL;
+    }
+    
+    /*reading velocity*/
+    for (i=0; i<n123; i++)
+    {
+        v[i]=*((float*)PyArray_GETPTR1(arr1,i));
+        v[i] = 1./(v[i]*v[i]);
+    }
+    
+    fastmarch_init (n3,n2,n1);
+ 
+    /* loop over shots */
+    nshot=1;
+    for( is = 0; is < nshot; is++) {
+	fastmarch(t,v,p, plane,
+		      n3,n2,n1,
+		      o3,o2,o1,
+		      d3,d2,d1,
+		      s[is][2],s[is][1],s[is][0], 
+		      b3,b2,b1,
+		      order);
+    }
+    
+    /*Below is the output part*/
+    PyArrayObject *vecout;
+	npy_intp dims[2];
+	dims[0]=n1*n2*n3;dims[1]=1;
+	/* Parse tuples separately since args will differ between C fcns */
+	/* Make a new double vector of same dimension */
+	vecout=(PyArrayObject *) PyArray_SimpleNew(1,dims,NPY_FLOAT);
+	
+	for(i=0;i<dims[0];i++)
+		(*((float*)PyArray_GETPTR1(vecout,i))) = t[i];
+
+	free(*s);free(s);free(t);free(v);free(p);
+	fastmarch_close();
+	
+	return PyArray_Return(vecout);
+	
+}
 
 static PyObject *eikonalc_oneshot_rtp(PyObject *self, PyObject *args){
 
@@ -1996,7 +2124,6 @@ static PyObject *eikonalc_multishots_rtp(PyObject *self, PyObject *args){
 	b2= plane[1]? n2: (int) (br2/d2+0.5);
 	b3= plane[0]? n3: (int) (br3/d3+0.5); 
 
-
     if( b1<1 ) b1=1;  
     if( b2<1 ) b2=1;  
     if( b3<1 ) b3=1;
@@ -2048,7 +2175,7 @@ static PyObject *eikonalc_multishots_rtp(PyObject *self, PyObject *args){
 		      b3,b2,b1,
 		      order);
     }
-    
+
     /*Below is the output part*/
     PyArrayObject *vecout;
 	npy_intp dims[2];
@@ -2077,6 +2204,7 @@ static PyMethodDef functions[] = {
   {"eikonalc_multishots", eikonalc_multishots, METH_VARARGS, eikonalc_document},
   {"eikonalc_multishots_angle",eikonalc_multishots_angle, METH_VARARGS, eikonalc_document},
   {"eikonalc_surf", eikonalc_surf, METH_VARARGS, eikonalc_document},
+  {"eikonalc_planesource", eikonalc_planesource, METH_VARARGS, eikonalc_document},
   {"eikonalc_oneshot_rtp", eikonalc_oneshot_rtp, METH_VARARGS, eikonalc_document},
   {"eikonalc_multishots_rtp", eikonalc_multishots_rtp, METH_VARARGS, eikonalc_document},
   {NULL, NULL, 0, NULL}

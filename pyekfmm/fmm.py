@@ -63,6 +63,43 @@ def eikonal(vel,xyz,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],order=2,verb
 	else:
 		return times
 	
+def eikonal_plane(vel,xyz,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],order=2,verb=1,angle=False,planedir=0):
+	'''
+	EIKONAL_PLANE: Fast marching eikonal solver (3-D) for plane sources
+	
+	INPUT
+	vel: 1D numpy array (nx*ny*nz)
+	xyz: 1D/2D numpy array (one event: 1x3 or multi-event: ne x 3)
+	ax: axis x [ox,dx,nx]
+	ay: axis y [oy,dy,ny]
+	az: axis z [oz,dz,nz]
+	order: accuracy order [1 or 2]
+	planedir: plane/line source direction [default: 0; line source along X direction]
+	
+	OUTPUT
+	times: traveltime in xyz respectively (1D numpy array)
+		   (one event: nx*ny*nz or multi-event: nx*ny*nz*ne)
+	
+	EXAMPLE
+	benchmark/test_*.py
+	
+	COPYRIGHT
+	Yangkang Chen, 2022, The University of Texas at Austin
+	
+	MODIFICATIONS
+	[1] By Yangkang Chen, May, 2025
+	
+	'''
+	vel=vel.flatten(order='F').astype('float32')
+	import numpy as np
+	from eikonalc import eikonalc_planesource
+# 	[ne,ndim]=xyz.shape;#ndim must be 3
+	x=xyz[0];y=xyz[1];z=xyz[2];
+# 	x=np.expand_dims(x,1);
+# 	y=np.expand_dims(y,1);
+# 	z=np.expand_dims(z,1);
+	times=eikonalc_planesource(vel,x,y,z,ax[0],ay[0],az[0],ax[1],ay[1],az[1],ax[2],ay[2],az[2],order,planedir);
+	return times
 	
 def eikonal_surf(vel,xyz,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],order=2,verb=1):
 	'''

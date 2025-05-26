@@ -144,6 +144,6 @@ for ax in (ax1, ax2, ax3, ax4):
 fig.text(0.5, 0, "x [km]", ha="center", va="bottom")
 fig.text(0.05, 0.5, "y [km]", ha="left", va="center", rotation=90)
 
-plt.savefig('pykonal_figure3.png')
+plt.savefig('pykonal_figure_3.png')
 plt.show()
 # In[ ]:
