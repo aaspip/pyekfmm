@@ -1,25 +1,15 @@
-#!/usr/bin/env python
-# coding: utf-8
+#This script reproduces figure 6 in the Pykonal paper; the original Pykonal script is in the Pykonal folder
 
-# # Figure 6
-# Compatible with PyKonal Version 0.2.0
-
-# In[1]:
-
-
-# %matplotlib ipympl
+#NOTE: Adjust the "trim" parameter in fmm.ray2d, you'll see different near-source ray paths
 
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
 import numpy as np
-import pykonal
+# import pykonal
 
 from matplotlib import markers
 from matplotlib.path import Path
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
-
-
-# In[2]:
 
 
 def align_marker(marker, halign='center', valign='middle',):
@@ -85,22 +75,40 @@ def align_marker(marker, halign='center', valign='middle',):
 
 
 # # Define the velocity model
-
-# In[3]:
-
-
 # Set the velocity gradient in 1/s
+# velocity_gradient = 0.25
+
+# velocity = pykonal.fields.ScalarField3D(coord_sys="cartesian")
+# velocity.min_coords = 0, 0, 0
+# velocity.npts = 4096, 1024, 1
+# velocity.node_intervals = [40, 10, 1] / velocity.npts
+# velocity.values = np.full(velocity.npts, fill_value=4.5)
+# 
+# for iy in range(velocity.npts[1]):
+#     velocity.values[:,iy] += velocity_gradient * velocity.nodes[0,iy,0,1]
+# plt.imshow(velocity.values[:,:,0].transpose());
+# plt.show()
+
+
+
+
 velocity_gradient = 0.25
+nx,ny = 4096, 1024
+npts = 4096, 1024
+node_intervals = np.array([40, 10]) / npts # array([0.00976562, 0.00976562])
 
-velocity = pykonal.fields.ScalarField3D(coord_sys="cartesian")
-velocity.min_coords = 0, 0, 0
-velocity.npts = 4096, 1024, 1
-velocity.node_intervals = [40, 10, 1] / velocity.npts
-velocity.values = np.full(velocity.npts, fill_value=4.5)
+x=0+np.arange(nx)*node_intervals[0]
+y=0+np.arange(ny)*node_intervals[1]
 
-for iy in range(velocity.npts[1]):
-    velocity.values[:,iy] += velocity_gradient * velocity.nodes[0,iy,0,1]
+xx_c,yy_c=np.meshgrid(x,y) #for plotting
+xx_c=xx_c.transpose() #for plotting
+yy_c=yy_c.transpose() #for plotting
 
+vv0 = np.matmul((y*velocity_gradient)[:,np.newaxis],np.ones([1,nx])).transpose();
+vv0 = np.ones([nx,ny])*4.5+vv0;
+plt.imshow(vv0.transpose(),extent=[0,40,10,0]);
+plt.title("Velocity model")
+plt.show()
 
 # # Determine the analytical solution
 
@@ -114,10 +122,14 @@ takeoff_angle = np.radians(50)
 src_idx = np.array([128, 128, 0])
 
 # Get the source coordinates.
-src_coords = velocity.nodes[tuple(src_idx)]
+# src_coords = velocity.nodes[tuple(src_idx)]
+
+src_coords = np.array([x[src_idx[0]],y[src_idx[1]],0])
 
 # Compute the radius of the circle defining the raypath.
-radius = velocity.value(src_coords) / (velocity_gradient * np.sin(takeoff_angle))
+radius = vv0[src_idx[0],src_idx[1]] / (velocity_gradient * np.sin(takeoff_angle))
+print("radius ( 25.129090319646362) =",radius)
+# 25.129090319646362
 
 # Compute the coordinates of the center of the circle.
 center_coords = src_coords + radius*np.array([np.cos(takeoff_angle), np.sin(takeoff_angle), 0])
@@ -142,29 +154,70 @@ rec_coords = [horizontal_coords(0)[0], 0]
 # In[6]:
 
 
+# rays = dict()
+# 
+# for decimation_factor in range(6, 1, -1):
+#     decimation_factor = 2**decimation_factor
+#     
+#     vv = velocity.values[::decimation_factor, ::decimation_factor]
+# 
+#     solver = pykonal.EikonalSolver(coord_sys="cartesian")
+# 
+#     solver.velocity.min_coords = 0, 0, 0
+#     solver.velocity.node_intervals = velocity.node_intervals * decimation_factor
+#     solver.velocity.npts = vv.shape
+#     solver.velocity.values = vv
+# 
+#     idx = tuple((src_idx / decimation_factor).astype(np.int_) - [1, 1, 0])
+#     solver.traveltime.values[idx] = 0
+#     solver.unknown[idx] = False
+#     solver.trial.push(*idx)
+# 
+# #     get_ipython().run_line_magic('time', 'solver.solve()')
+#     solver.solve()
+#     rays[decimation_factor] = solver.trace_ray(np.array([rec_coords[0], 0, 0]))
+
+
+################################################################################################
+# Using pyekfmm
+## Isotropic case (Cartesian)
+################################################################################################
+import pyekfmm as fmm
+
 rays = dict()
+traveltime_fields = dict()
+
+npts = 4096, 1024, 1
+node_intervals = np.array([40, 10, 1]) / npts
 
 for decimation_factor in range(6, 1, -1):
     decimation_factor = 2**decimation_factor
     
-    vv = velocity.values[::decimation_factor, ::decimation_factor]
-
-    solver = pykonal.EikonalSolver(coord_sys="cartesian")
-
-    solver.velocity.min_coords = 0, 0, 0
-    solver.velocity.node_intervals = velocity.node_intervals * decimation_factor
-    solver.velocity.npts = vv.shape
-    solver.velocity.values = vv
-
+#     vv = vv0[::decimation_factor, ::decimation_factor]
+    vv = vv0[::decimation_factor, ::decimation_factor]
+    npts=vv.shape
+    intervals=node_intervals * decimation_factor #node_intervals = 0.004, 0.004, 1
     idx = tuple((src_idx / decimation_factor).astype(np.int_) - [1, 1, 0])
-    solver.traveltime.values[idx] = 0
-    solver.unknown[idx] = False
-    solver.trial.push(*idx)
+    
+#     idx[0],idx[1],0
+    print("source location:",src_coords[0],src_coords[1],src_coords[2])
 
-#     get_ipython().run_line_magic('time', 'solver.solve()')
-    solver.solve()
-    rays[decimation_factor] = solver.trace_ray(np.array([rec_coords[0], 0, 0]))
+    vel=vv.flatten(order='F') 
+    t=fmm.eikonal(vel,xyz=np.array([src_coords[0],src_coords[1],src_coords[2]]),ax=[0,intervals[0],npts[0]],ay=[0,intervals[1],npts[1]],az=[0,1,1],order=2);
+    time_c=t.reshape(npts[0],npts[1],order='F');	#first axis (vertical) is x, second is z
+    
+    paths=fmm.ray2d(time_c,source=[src_coords[0],src_coords[1]],receiver=[rec_coords[0], 0],ax=[0,intervals[0],npts[0]],ay=[0,intervals[1],npts[1]],az=[0,1,1],step=0.2,trim=5)
 
+    traveltime_fields[decimation_factor] = time_c
+    rays[decimation_factor] = paths.transpose()
+
+plt.imshow(traveltime_fields[4],aspect='auto',extent=[0,40,10,0]);
+plt.plot(src_coords[0],src_coords[1],'rp');
+plt.plot(rec_coords[0],rec_coords[1],'bv');
+plt.plot(rays[4][:,0],rays[4][:,1],'-k');
+plt.colorbar();
+plt.title("One example of the rays on top of traveltime")
+plt.show()
 
 # # Plot the results
 
@@ -279,7 +332,7 @@ for ax in (axins1, axins2, axins3, ax0):
 fig.legend(loc="center right")
 fig.tight_layout()
 
-plt.savefig('pykonal_figure_6.png')
+plt.savefig('test_pykonal_figure_6.png',bbox_inches='tight')
 plt.show()
 # In[ ]:
 
