@@ -1,4 +1,4 @@
-#This script reproduce figure 3 in Pykonal paper, the original pykonal script is in the pykonal folder
+#This script reproduces figure 3 in the Pykonal paper; the original Pykonal script is in the Pykonal folder
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
 import numpy as np

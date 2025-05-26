@@ -63,7 +63,8 @@ for decimation_factor in range(7, -1, -1):
     solver.unknown[src_idx] = False
     solver.trial.push(*src_idx)
 
-    get_ipython().run_line_magic('time', 'solver.solve()')
+#     get_ipython().run_line_magic('time', 'solver.solve()')
+    solver.solve()
     traveltime_fields[decimation_factor] = solver.traveltime
 
 
