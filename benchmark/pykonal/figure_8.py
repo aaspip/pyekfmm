@@ -24,6 +24,8 @@ velocity = pykonal.fields.ScalarField3D(coord_sys="cartesian")
 velocity.min_coords = 0, 0, 0
 velocity.node_intervals = 0.1, 0.1, 0.1
 velocity.npts = 512, 128, 1
+
+np.random.seed(202314)
 velocity.values = scipy.ndimage.gaussian_filter(20. * np.random.randn(*velocity.npts) + 6., 10)
 
 

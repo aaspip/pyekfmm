@@ -1,6 +1,6 @@
 #This script reproduces figure 7 in the Pykonal paper; the original Pykonal script is in the Pykonal folder
 
-# %matplotlib ipympl
+
 
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
