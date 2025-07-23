@@ -627,6 +627,80 @@ def extracts(time, points, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
 		
 	return tpoint
 
+
+
+def extracts2(t, points, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
+	'''
+	extracts2: extract values (e.g., time/dip/azimuth) from 1D array
+
+	The difference between extracts2 and extracts is the vectorized computation in extracts2
+	(The slower version of extracts may be removed in future versions)
+
+	INPUT
+		t: 		  1D traveltime/dip/azimuth in fortran order
+		points:   point locations [nx3] for extracting time/dip/azim
+		ax,ay,az: ax=[0,dx,nx],ay=[0,dy,ny],az=[0,dz,nz]
+		nx,ny,nz: number of points in x,y,z directions
+		dx,dy,dz: step distance in x,y,z directions
+
+	OUTPUT
+		tpoints: time/dip/azim at points [x,y,z]
 		
+	Written by Robert Skoumal, July 22, 2025
+	
+	'''
+	
+	nx = ax[2]
+	ny = ay[2]
+	nz = az[2]
+	dx = ax[1]
+	dy = ay[1]
+	dz = az[1]
+
+	pointx=(points[:,0]-ax[0])/ax[1]
+	pointy=(points[:,1]-ay[0])/ay[1]
+	pointz=(points[:,2]-az[0])/az[1]
+
+	ix=np.floor(pointx).astype(int)
+	iy=np.floor(pointy).astype(int)
+	iz=np.floor(pointz).astype(int)
+
+	tmp_flag= (ix == nx-1)
+	if tmp_flag.any():
+		ix[tmp_flag]=nx-1
+
+	tmp_flag= (iy == ny-1)
+	if tmp_flag.any():
+		iy[tmp_flag]=ny-1
+
+	tmp_flag= (iz == nz-1)
+	if tmp_flag.any():
+		iz[tmp_flag]=nz-1
+
+	xfrac=pointx-ix
+	yfrac=pointy-iy
+	zfrac=pointz-iz
+
+	# weights for linear interpolation
+	a=(1-xfrac)*(1-yfrac)*(1-zfrac)
+	b=(1-xfrac)*(  yfrac)*(1-zfrac)
+	c=(  xfrac)*(1-yfrac)*(1-zfrac)
+	d=(  xfrac)*(  yfrac)*(1-zfrac)
+	e=(1-xfrac)*(1-yfrac)*(  zfrac)
+	f=(1-xfrac)*(  yfrac)*(  zfrac)
+	g=(  xfrac)*(1-yfrac)*(  zfrac)
+	h=(  xfrac)*(  yfrac)*(  zfrac)
+
+	tpoints = t[ix  +nx*iy 	  +nx*ny*iz]*a + \
+			 t[ix  +nx*(iy+1)+nx*ny*iz]*b + \
+			 t[ix+1+nx*iy    +nx*ny*iz]*c + \
+			 t[ix+1+nx*(iy+1)+nx*ny*iz]*d + \
+			 t[ix  +nx*iy    +nx*ny*(iz+1)]*e + \
+			 t[ix  +nx*(iy+1)+nx*ny*(iz+1)]*f + \
+			 t[ix+1+nx*iy    +nx*ny*(iz+1)]*g + \
+			 t[ix+1+nx*(iy+1)+nx*ny*(iz+1)]*h
+
+	return tpoints
+	
 	
 	
