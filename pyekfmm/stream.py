@@ -420,6 +420,87 @@ def ray2d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],step=0.1,maxvert=
 	
 	return paths	
 
+def ray2d2(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],step=1,maxvert=10000,**kws):
+	'''
+	ray2d2: 2D ray tracing using fixed step size
+	
+	INPUT
+	time: 2D traveltime
+	source: 	source location [sx,sy]
+	receiver: receiver location [rx,ry]
+	ax=[0,dx,nx],ay=[0,dy,ny]
+	step:ray segment increase
+	maxvert: maximum number of verts
+	
+	kws:	other key words (e.g., trim=0.5)
+	trim:  allowable distance between the source point and the second last ray point (in absolute grid spacing)
+	trim = 0.000000001 means no trimming; when trim=0, the number of ray points will increase by 1, adding the source.
+	
+	OUTPUT
+	paths: ray paths [x,y]
+	'''
+	dx=ax[1];dy=ay[1];
+	nx=ax[2];ny=ay[2];
+	
+	sx, sy=source
+	rx, ry=receiver
+	px, py = rx, ry
+	ray_x, ray_y = [px], [py]
+	
+	Ty, Tx = np.gradient(time, dy, dx)
+	
+	# Trace ray from receiver to source along negative gradient
+	for _ in range(1000):
+		ix, iy = int(round(px/dx)), int(round(py/dy))
+		if np.hypot(px - sx, py - sy) < 0.5*dx:
+			break
+		gx = Tx[iy, ix]
+		gy = Ty[iy, ix]
+		norm = np.hypot(gx, gy)
+		if norm == 0:
+			break
+#		 step = 1.0
+		px -= step * gx / norm *dx
+		py -= step * gy / norm *dy
+		px = np.clip(px, 0, (nx-1)*dx)
+		py = np.clip(py, 0, (ny-1)*dy)
+		ray_x.append(px)
+		ray_y.append(py)
+		
+	paths=np.concatenate([np.array(ray_x)[:,np.newaxis],np.array(ray_y)[:,np.newaxis]],axis=1).T
+		
+	## Gradient calculation
+# 	dx=ax[1];dy=ay[1];
+# 	nx=ax[2];ny=ay[2];
+# 
+# 	if nx==1 and ny==1:
+# 		Exception("INPUT ERROR: the input time must have at least two dimensions")
+# 			
+# 	time=np.squeeze(time)
+# 		
+# 	print('dx,dy',dx,dy)
+# 	tx,ty = np.gradient(time)
+# 
+# 	tx,ty=tx/dx,ty/dy
+# 	
+# 	receiverx=(receiver[0]-ax[0])/ax[1]+1
+# 	receivery=(receiver[1]-ay[0])/ay[1]+1
+# 	
+# 	paths,nrays=stream2d(-tx,-ty, dx, dy, receiverx, receivery, step=step, maxvert=maxvert)
+# 
+# 	print('Before trim',paths.shape)
+# 	if 'trim' in kws.keys():
+# 		sourcex=(source[0]-ax[0])/ax[1]+1
+# 		sourcey=(source[1]-ay[0])/ay[1]+1
+# 		## trim the rays and add the source point
+# 		paths=trimrays(paths,start_points=np.array([sourcex,sourcey]),T=kws['trim']) #e.g., 0.5
+# 	print('After trim',paths.shape)
+# 		
+# 	paths[0,:]=(paths[0,:]-1)*dx;
+# 	paths[1,:]=(paths[1,:]-1)*dy;
+# 	
+	return paths
+
 
 def ray3d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],step=0.1,maxvert=10000,**kws):
 	'''
