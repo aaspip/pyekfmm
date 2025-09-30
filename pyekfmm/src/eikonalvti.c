@@ -1049,9 +1049,9 @@ static PyObject *eikonalvtic_oneshot(PyObject *self, PyObject *args){
 	order=f13;
 	
 	
-    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_IN_ARRAY);
-    arr2 = PyArray_FROM_OTF(arg2, NPY_FLOAT, NPY_IN_ARRAY);
-    arr3 = PyArray_FROM_OTF(arg3, NPY_FLOAT, NPY_IN_ARRAY);
+    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arr2 = PyArray_FROM_OTF(arg2, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arr3 = PyArray_FROM_OTF(arg3, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     /*
      * my code starts here
      */
@@ -1186,7 +1186,7 @@ static PyObject *eikonalvtic_oneshot_angle(PyObject *self, PyObject *args){
 	order=f13;
 	
 	
-    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_IN_ARRAY);
+    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     /*
      * my code starts here
      */
@@ -1415,10 +1415,10 @@ static PyObject *eikonalvtic_multishots(PyObject *self, PyObject *args){
 	order=f13;
 	verb=f14; /*verbosity*/
     
-    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_IN_ARRAY);
+    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     npy_intp *sp=PyArray_SHAPE(arr1);
     npy_intp *spxyz=PyArray_SHAPE(arrf1);
@@ -1542,10 +1542,10 @@ static PyObject *eikonalvtic_multishots_angle(PyObject *self, PyObject *args){
 	order=f13;
 	verb=f14; /*verbosity*/
     
-    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_IN_ARRAY);
+    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     npy_intp *sp=PyArray_SHAPE(arr1);
     npy_intp *spxyz=PyArray_SHAPE(arrf1);
@@ -1713,10 +1713,10 @@ static PyObject *eikonalvtic_surf(PyObject *self, PyObject *args){
 	order=f13;
 	verb=f14;
     
-    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_IN_ARRAY);
+    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     npy_intp *sp=PyArray_SHAPE(arr1);
     npy_intp *spxyz=PyArray_SHAPE(arrf1);
@@ -1844,7 +1844,7 @@ static PyObject *eikonalvtic_oneshot_rtp(PyObject *self, PyObject *args){
 	
 	order=f13;
 	
-    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_IN_ARRAY);
+    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     /*
      * my code starts here
      */
@@ -1965,10 +1965,10 @@ static PyObject *eikonalvtic_multishots_rtp(PyObject *self, PyObject *args){
 	order=f13;
 	verb=f14;
     
-    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_IN_ARRAY);
-    arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_IN_ARRAY);
+    arr1 = PyArray_FROM_OTF(arg1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf2 = PyArray_FROM_OTF(f2, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
+    arrf3 = PyArray_FROM_OTF(f3, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     npy_intp *sp=PyArray_SHAPE(arr1);
     npy_intp *spxyz=PyArray_SHAPE(arrf1);
