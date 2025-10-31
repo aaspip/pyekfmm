@@ -422,7 +422,7 @@ def ray2d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],step=0.1,maxvert=
 
 def ray2d2(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],step=1,maxvert=10000,**kws):
 	'''
-	ray2d2: 2D ray tracing using fixed step size
+	ray2d2: 2D ray tracing using fixed step size (for the path-length-matrix)
 	
 	INPUT
 	time: 2D traveltime
@@ -439,6 +439,7 @@ def ray2d2(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],step=1,maxvert=1
 	OUTPUT
 	paths: ray paths [x,y]
 	'''
+	x0=ax[0];y0=ay[0];
 	dx=ax[1];dy=ay[1];
 	nx=ax[2];ny=ay[2];
 	
@@ -451,7 +452,7 @@ def ray2d2(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],step=1,maxvert=1
 	
 	# Trace ray from receiver to source along negative gradient
 	for _ in range(1000):
-		ix, iy = int(round(px/dx)), int(round(py/dy))
+		ix, iy = int(round((px-x0)/dx)), int(round((py-y0)/dy))
 		if np.hypot(px - sx, py - sy) < 0.5*dx:
 			break
 		gx = Tx[iy, ix]
@@ -462,8 +463,8 @@ def ray2d2(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],step=1,maxvert=1
 #		 step = 1.0
 		px -= step * gx / norm *dx
 		py -= step * gy / norm *dy
-		px = np.clip(px, 0, (nx-1)*dx)
-		py = np.clip(py, 0, (ny-1)*dy)
+		px = np.clip(px, x0, x0+(nx-1)*dx)
+		py = np.clip(py, y0, y0+(ny-1)*dy)
 		ray_x.append(px)
 		ray_y.append(py)
 		
@@ -555,6 +556,81 @@ def ray3d(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],s
 	paths[1,:]=(paths[1,:]-1)*dy;
 	paths[2,:]=(paths[2,:]-1)*dz;
 	
+	return paths	
+	
+def ray3d2(time,source,receiver,ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101],step=1,maxvert=10000,**kws):
+	'''
+	ray3d2: 3D ray tracing using fixed step size (for the path-length-matrix)
+	
+	INPUT
+	time: 3D traveltime [x,y,z]
+	source: 	source location [sx,sy,sz]
+	receiver: receiver location [rx,ry,rz]
+	ax=[0,dx,nx],ay=[0,dy,ny],az=[0,dz,nz]
+	step:ray segment increase
+	maxvert: maximum number of verts
+	
+	kws:	other key words (e.g., trim=0.5)
+	trim:  allowable distance between the source point and the second last ray point (in absolute grid spacing)
+	trim = 0.000000001 means no trimming; when trim=0, the number of ray points will increase by 1, adding the source.
+	
+	OUTPUT
+	paths: ray paths [x,y,z]
+	'''
+	
+# 	print('receiver',receiver)
+# 	print('source',source)
+	
+	## Gradient calculation
+	x0=ax[0];y0=ay[0];z0=az[0];
+	dx=ax[1];dy=ay[1];dz=az[1];
+	nx=ax[2];ny=ay[2];nz=az[2];
+	
+# 	print('dx,dy,dz',dx,dy,dz)
+# 	print('nx,ny,nz',nx,ny,nz)
+
+	sx, sy, sz=source
+	rx, ry, rz=receiver
+	px, py, pz = rx, ry, rz
+	ray_x, ray_y, ray_z = [px], [py], [pz]
+	
+	Tx, Ty, Tz = np.gradient(time, dx, dy, dz)
+
+# 	tx,ty,tz=tx/dx, ty/dy,tz/dz
+	
+# 	receiverx=(receiver[0]-ax[0])/ax[1]+1
+# 	receivery=(receiver[1]-ay[0])/ay[1]+1
+# 	receiverz=(receiver[2]-az[0])/az[1]+1
+	
+# 	paths,nrays=stream3d(-tx,-ty, -tz, dx, dy, dz, receiverx, receivery, receiverz, step=step, maxvert=maxvert)
+
+	# Trace ray from receiver to source along negative gradient
+	for _ in range(1000):
+		ix, iy, iz = int(round((px-x0)/dx)), int(round((py-y0)/dy)), int(round((pz-z0)/dz))
+		if np.sqrt( (px - sx)*(px - sx) + (py - sy)*(py - sy) + (pz - sz)*(pz - sz) )  < 0.5*dx and np.sqrt( (px - sx)*(px - sx) + (py - sy)*(py - sy) + (pz - sz)*(pz - sz) )  < 0.5*dy and np.sqrt( (px - sx)*(px - sx) + (py - sy)*(py - sy) + (pz - sz)*(pz - sz) ) and 0.5*dz:
+# 			print('break in a second')
+			break
+		gx = Tx[ix, iy, iz]
+		gy = Ty[ix, iy, iz]
+		gz = Tz[ix, iy, iz]
+		norm = np.sqrt(gx*gx + gy*gy + gz*gz)
+		if norm == 0:
+# 			print('break 2 in a second')
+			break
+#		 step = 1.0
+		px -= step * gx / norm *dx
+		py -= step * gy / norm *dy
+		pz -= step * gz / norm *dz
+		px = np.clip(px, x0, x0+(nx-1)*dx)
+		py = np.clip(py, y0, y0+(ny-1)*dy)
+		pz = np.clip(pz, z0, z0+(nz-1)*dz)
+		ray_x.append(px)
+		ray_y.append(py)
+		ray_z.append(pz)
+		
+	paths=np.concatenate([np.array(ray_x)[:,np.newaxis],np.array(ray_y)[:,np.newaxis],np.array(ray_z)[:,np.newaxis]],axis=1).T
+	
+# 	print('p to source :',np.sqrt( (px - sx)*(px - sx) + (py - sy)*(py - sy) + (pz - sz)*(pz - sz) ),'_ =', _)
 	return paths	
 	
 def extract(time, point, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):

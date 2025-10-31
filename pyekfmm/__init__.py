@@ -29,6 +29,7 @@ from .stream import trimrays
 from .stream import ray2d
 from .stream import ray2d2
 from .stream import ray3d
+from .stream import ray3d2
 from .stream import extract
 from .stream import extracts
 from .stream import extracts2
