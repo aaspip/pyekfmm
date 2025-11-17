@@ -35,6 +35,7 @@ from .stream import extracts
 from .stream import extracts2
 from .plot import plot3d
 from .vel import *
+from .coordinates import *
 
 
 
