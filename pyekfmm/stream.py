@@ -771,7 +771,7 @@ def extracts(time, points, ax=[0,0.01,101],ay=[0,0.01,101],az=[0,0.01,101]):
 	
 	'''
 	if points.size==3:
-		tpoint=extract(time, points, ax, ay, az)
+		tpoint=[extract(time, points.flatten(order='F'), ax, ay, az)]
 	else:
 		[n1,n2]=points.shape
 		if n2 != 3:
