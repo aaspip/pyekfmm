@@ -16,7 +16,7 @@ eikonalvtic_module = Extension('eikonalvtic', sources=['pyekfmm/src/eikonalvti.c
 
 setup(
     name="pyekfmm",
-    version="0.0.8.8",
+    version="0.0.9.0",
     license='MIT License',
     description="Fast Marching Method for Traveltime Calculation",
     long_description=long_description,
